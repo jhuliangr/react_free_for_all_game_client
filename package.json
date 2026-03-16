@@ -3,11 +3,19 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "imports": {
+    "#shared/*": "./src/shared/*.ts"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint-detect": "eslint",
+    "lint-fix": "eslint --fix",
+    "format-detect": "prettier --check .",
+    "format-fix": "prettier --write .",
+    "prepare": "husky"
   },
   "dependencies": {
     "react": "^19.2.4",
@@ -24,6 +32,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.4.0",
+    "husky": "^9.1.7",
     "prettier": "^3.8.1",
     "tailwindcss": "^4.2.1",
     "typescript": "~5.9.3",
