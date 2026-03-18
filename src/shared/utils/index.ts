@@ -8,3 +8,10 @@ import { twMerge } from 'tailwind-merge';
 export function cn(...inputs: Array<Argument>): string {
   return twMerge(classnames(inputs));
 }
+
+export type { ServiceConfig, HttpClient } from './types';
+
+export {
+  validateResponse,
+  responseValidatorFactory,
+} from './validate-response';

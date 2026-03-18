@@ -1,10 +1,10 @@
-import { Counter } from './Counter';
+import { FetchComponent } from './FetchComponent';
 
 function App() {
   return (
     <>
       <h1>React.js</h1>
-      <Counter />;
+      <FetchComponent />
     </>
   );
 }
