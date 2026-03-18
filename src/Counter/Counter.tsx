@@ -6,10 +6,22 @@ export const Counter: React.FC = () => {
   const handleIncrement = () => {
     setCounter((prev) => prev + 1);
   };
+  const handleDecrement = () => {
+    setCounter((prev) => prev - 1);
+  };
+  const handleClear = () => {
+    setCounter(0);
+  };
   return (
     <div className="flex-1 flex items-center justify-center gap-3">
       Counter: {counter}
-      <Button onClick={handleIncrement}>Increment</Button>
+      <div className="flex flex-col gap-3">
+        <Button onClick={handleIncrement}>Increment</Button>
+        <Button onClick={handleDecrement}>Decrement</Button>
+        <Button onClick={handleClear} variant="secondary">
+          Clear
+        </Button>
+      </div>
     </div>
   );
 };
