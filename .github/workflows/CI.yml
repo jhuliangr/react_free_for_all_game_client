@@ -1,0 +1,31 @@
+name: CI workflow
+
+on:
+  pull_request:
+    branches: 
+      - main
+jobs:
+  ci:
+    name: Lint, Format and Test
+    runs-on: ubuntu-latest
+
+    steps: 
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with: 
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        uses: npm ci
+      
+      - name: Lint 
+        uses: npm run lint
+      
+      - name: Check format
+        uses: npm run format-detect
+      
+      
