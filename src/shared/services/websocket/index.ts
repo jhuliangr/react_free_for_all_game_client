@@ -1,6 +1,7 @@
 import { GameSocket } from './websocket-service';
 export type {
   Player,
+  PlayerDiff,
   WelcomeMessage,
   CombatEventMessage,
   ErrorMessage,

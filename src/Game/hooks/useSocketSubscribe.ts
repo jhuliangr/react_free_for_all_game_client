@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 export function useSocketSubscribe() {
   const [joined, setJoined] = useState(false);
-  const { setMyPlayerId, updatePlayers, setCombatEvent, reset } =
+  const { setMyPlayerId, applyStateUpdate, setCombatEvent, reset } =
     useGameStore();
 
   useEffect(() => {
@@ -20,13 +20,15 @@ export function useSocketSubscribe() {
         case 'welcome': {
           const welcome = msg as WelcomeMessage;
           setMyPlayerId(welcome.playerId);
-          updatePlayers([welcome.player]);
+          applyStateUpdate([welcome.player], []);
           setJoined(true);
           break;
         }
-        case 'state_update':
-          updatePlayers((msg as StateUpdateMessage).players);
+        case 'state_update': {
+          const update = msg as StateUpdateMessage;
+          applyStateUpdate(update.players, update.removed ?? []);
           break;
+        }
         case 'combat_event':
           setCombatEvent(msg as CombatEventMessage);
           break;
@@ -37,7 +39,7 @@ export function useSocketSubscribe() {
       unsub();
       gameSocket.disconnect();
     };
-  }, [setCombatEvent, setMyPlayerId, updatePlayers]);
+  }, [setCombatEvent, setMyPlayerId, applyStateUpdate]);
 
   const leave = useCallback(() => {
     gameSocket.disconnect();

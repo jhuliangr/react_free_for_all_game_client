@@ -1,4 +1,5 @@
 import type { Player } from '#shared/services/websocket';
+import { SCALE_X, SCALE_Y } from './canvasConstants';
 
 export const renderPlayer = (
   p: Player,
@@ -8,8 +9,8 @@ export const renderPlayer = (
   playerId: string,
   sprite: HTMLImageElement,
 ) => {
-  const sx = p.x * (800 / 2000) + offsetX;
-  const sy = p.y * (600 / 2000) + offsetY;
+  const sx = p.x * SCALE_X + offsetX;
+  const sy = p.y * SCALE_Y + offsetY;
   if (p.id === playerId && sprite && import.meta.env.VITE_SPRITES === 'true') {
     ctx.drawImage(sprite, sx - 30, sy - 30, 60, 60);
   } else {

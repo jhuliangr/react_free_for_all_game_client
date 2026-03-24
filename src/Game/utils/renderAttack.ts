@@ -1,3 +1,8 @@
+const PLAYER_RADIUS = 12;
+const BLADE_OUTER = 65;
+const SPREAD = Math.PI / 4;
+const BLADE_WIDTH = Math.PI / 12;
+
 export const renderAttack = (
   ctx: CanvasRenderingContext2D,
   angle: number,
@@ -5,36 +10,35 @@ export const renderAttack = (
   cx = 400,
   cy = 300,
 ) => {
-  const spread = Math.PI / 4;
-  const startAngle = angle - spread;
-  const currentAngle = startAngle + progress * spread * 2;
-  const range = 65;
+  const sweptAngle = progress * SPREAD * 2;
+  if (sweptAngle < 0.01) return;
+
+  const startAngle = angle - SPREAD;
+  const currentAngle = startAngle + sweptAngle;
+  const bladeWidth = Math.min(BLADE_WIDTH, sweptAngle);
 
   ctx.save();
 
-  // Wide fading trail arc
+  const trailAlpha = 0.32 * (1 - progress * 0.5);
   ctx.beginPath();
-  ctx.arc(cx, cy, range, startAngle, currentAngle);
-  ctx.lineWidth = 12;
-  ctx.strokeStyle = `rgba(160, 210, 255, ${0.45 * (1 - progress * 0.4)})`;
-  ctx.lineCap = 'round';
-  ctx.stroke();
+  ctx.arc(cx, cy, BLADE_OUTER, startAngle, currentAngle);
+  ctx.arc(cx, cy, PLAYER_RADIUS, currentAngle, startAngle, true);
+  ctx.closePath();
+  ctx.fillStyle = `rgba(160, 210, 255, ${trailAlpha})`;
+  ctx.fill();
 
-  // Bright thin arc on top (the blade edge)
   ctx.beginPath();
-  ctx.arc(cx, cy, range, startAngle, currentAngle);
-  ctx.lineWidth = 2.5;
+  ctx.arc(cx, cy, BLADE_OUTER, currentAngle - bladeWidth, currentAngle);
+  ctx.arc(cx, cy, PLAYER_RADIUS, currentAngle, currentAngle - bladeWidth, true);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(255, 245, 180, 0.85)';
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, BLADE_OUTER, currentAngle - bladeWidth, currentAngle);
+  ctx.lineWidth = 2;
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
-  ctx.stroke();
-
-  // Leading sword blade: line from center to tip
-  const tipX = cx + Math.cos(currentAngle) * range;
-  const tipY = cy + Math.sin(currentAngle) * range;
-  ctx.beginPath();
-  ctx.moveTo(cx, cy);
-  ctx.lineTo(tipX, tipY);
-  ctx.lineWidth = 3;
-  ctx.strokeStyle = 'rgba(255, 240, 180, 0.95)';
+  ctx.lineCap = 'round';
   ctx.stroke();
 
   ctx.restore();

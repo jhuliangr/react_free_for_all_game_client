@@ -1,20 +1,16 @@
-import type { Player } from '#shared/services/websocket';
+import type {
+  CombatEventMessage,
+  Player,
+  PlayerDiff,
+} from '#shared/services/websocket';
 
 export type GameStateStore = {
   myPlayerId: string | null;
   players: Record<string, Player>;
-  lastCombatEvent: {
-    attackerId: string;
-    defenderId: string;
-    damage: number;
-  } | null;
+  lastCombatEvent: CombatEventMessage | null;
 
   setMyPlayerId: (id: string) => void;
-  updatePlayers: (players: Player[]) => void;
-  setCombatEvent: (e: {
-    attackerId: string;
-    defenderId: string;
-    damage: number;
-  }) => void;
+  applyStateUpdate: (diffs: PlayerDiff[], removed: string[]) => void;
+  setCombatEvent: (e: CombatEventMessage) => void;
   reset: () => void;
 };

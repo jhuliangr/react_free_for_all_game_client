@@ -28,7 +28,7 @@ export function useAttackAnimation() {
 
     if (rAFRef.current) cancelAnimationFrame(rAFRef.current);
     const startTime = performance.now();
-    const duration = 150;
+    const duration = 50;
 
     const animate = (now: number) => {
       const progress = Math.min((now - startTime) / duration, 1);

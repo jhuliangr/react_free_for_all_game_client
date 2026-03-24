@@ -1,7 +1,16 @@
 import type { Player } from '#shared/services/websocket';
 import type { RefObject } from 'react';
 import { useEffect } from 'react';
-import { renderAttack, renderPlayer } from '../utils';
+import {
+  CANVAS_H,
+  CANVAS_W,
+  SCALE_X,
+  SCALE_Y,
+  renderAttack,
+  renderGrid,
+  renderMapBounds,
+  renderPlayer,
+} from '../utils';
 
 export function useCanvasRenderer(
   canvasRef: RefObject<HTMLCanvasElement | null>,
@@ -16,11 +25,15 @@ export function useCanvasRenderer(
     const canvas = canvasRef.current;
     if (!canvas || !me) return;
     const ctx = canvas.getContext('2d')!;
-    ctx.clearRect(0, 0, 800, 600);
+    ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
 
-    const offsetX = 400 - me.x * (800 / 2000);
-    const offsetY = 300 - me.y * (600 / 2000);
+    const offsetX = CANVAS_W / 2 - me.x * SCALE_X;
+    const offsetY = CANVAS_H / 2 - me.y * SCALE_Y;
 
+    renderGrid(ctx, offsetX, offsetY);
+    renderMapBounds(ctx, offsetX, offsetY);
+
+    ctx.font = '11px sans-serif';
     Object.values(players).forEach((p) =>
       renderPlayer(
         p,
@@ -40,8 +53,8 @@ export function useCanvasRenderer(
       ([attackerId, { angle, startTime }]) => {
         const attacker = players[attackerId];
         if (!attacker) return;
-        const sx = attacker.x * (800 / 2000) + offsetX;
-        const sy = attacker.y * (600 / 2000) + offsetY;
+        const sx = attacker.x * SCALE_X + offsetX;
+        const sy = attacker.y * SCALE_Y + offsetY;
         const progress = Math.min((Date.now() - startTime) / 280, 1);
         renderAttack(ctx, angle, progress, sx, sy);
       },

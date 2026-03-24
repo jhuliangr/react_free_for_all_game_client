@@ -1,5 +1,5 @@
+import type { Player, PlayerDiff } from '#shared/services/websocket';
 import { create } from 'zustand';
-import type { Player } from '#shared/services/websocket';
 import type { GameStateStore } from './types/GameStateStore';
 
 export const useGameStore = create<GameStateStore>()((set, get) => ({
@@ -7,34 +7,26 @@ export const useGameStore = create<GameStateStore>()((set, get) => ({
   players: {},
   lastCombatEvent: null,
 
-  setMyPlayerId: (id) =>
-    set({
-      myPlayerId: id,
-    }),
+  setMyPlayerId: (id) => set({ myPlayerId: id }),
 
-  updatePlayers: (newPlayers) => {
-    const myId = get().myPlayerId;
-    const current = get().players;
-    const updated: Record<string, Player> = {};
-    newPlayers.forEach((p) => {
-      updated[p.id] = p;
+  applyStateUpdate: (diffs: PlayerDiff[], removed: string[] = []) => {
+    const { myPlayerId, players } = get();
+    const updated = { ...players };
+
+    removed.forEach((id) => {
+      if (id !== myPlayerId) delete updated[id];
     });
-    // Preserve own player if the server didn't include it in this update
-    if (myId && current[myId] && !updated[myId]) {
-      updated[myId] = current[myId];
-    }
+
+    diffs.forEach((diff) => {
+      updated[diff.id] = updated[diff.id]
+        ? { ...updated[diff.id], ...diff }
+        : (diff as Player);
+    });
+
     set({ players: updated });
   },
 
-  setCombatEvent: (e) =>
-    set({
-      lastCombatEvent: e,
-    }),
+  setCombatEvent: (e) => set({ lastCombatEvent: e }),
 
-  reset: () =>
-    set({
-      myPlayerId: null,
-      players: {},
-      lastCombatEvent: null,
-    }),
+  reset: () => set({ myPlayerId: null, players: {}, lastCombatEvent: null }),
 }));

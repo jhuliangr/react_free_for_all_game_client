@@ -14,36 +14,38 @@ export const PlayerSchema = z.object({
 });
 
 export type Player = z.infer<typeof PlayerSchema>;
+export const PlayerDiffSchema = PlayerSchema.partial().extend({
+  id: z.string(),
+});
+export type PlayerDiff = z.infer<typeof PlayerDiffSchema>;
 
 export const WelcomeMessageSchema = z.object({
-  type: 'welcome',
+  type: z.literal('welcome'),
   playerId: z.string(),
   player: PlayerSchema,
 });
 
 export const StateUpdateMessageSchema = z.object({
-  type: 'state_update',
-  players: z.array(PlayerSchema),
+  type: z.literal('state_update'),
+  players: z.array(PlayerDiffSchema),
+  removed: z.array(z.string()).default([]),
 });
 
 export const CombatEventMessageSchema = z.object({
-  type: 'combat_event',
+  type: z.literal('combat_event'),
   attackerId: z.string(),
   defenderId: z.string(),
   damage: z.number(),
 });
 
 export const ErrorMessageSchema = z.object({
-  type: 'error',
+  type: z.literal('error'),
   reason: z.string(),
 });
 
 export type WelcomeMessage = z.infer<typeof WelcomeMessageSchema>;
-
 export type StateUpdateMessage = z.infer<typeof StateUpdateMessageSchema>;
-
 export type CombatEventMessage = z.infer<typeof CombatEventMessageSchema>;
-
 export type ErrorMessage = z.infer<typeof ErrorMessageSchema>;
 
 export type ServerMessage =
