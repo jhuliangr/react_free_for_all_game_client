@@ -1,14 +1,9 @@
-import {
-  gameSocket,
-  type CombatEventMessage,
-} from '#shared/services/websocket';
+import { gameSocket, type CombatEventMessage } from '#shared/services/websocket';
 import { useGameStore } from '#shared/stores';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 export function useOtherPlayersAttacks(myPlayerId: string | null) {
-  const [activeAttacks, setActiveAttacks] = useState<
-    Record<string, { angle: number; startTime: number }>
-  >({});
+  const activeAttacksRef = useRef<Record<string, { angle: number; startTime: number }>>({});
 
   useEffect(() => {
     const unsub = gameSocket.onMessage((msg) => {
@@ -21,26 +16,20 @@ export function useOtherPlayersAttacks(myPlayerId: string | null) {
       const defender = players[defenderId];
       if (!attacker || !defender) return;
 
-      const angle = Math.atan2(
-        defender.y - attacker.y,
-        defender.x - attacker.x,
-      );
-      const startTime = Date.now();
+      const angle = Math.atan2(defender.y - attacker.y, defender.x - attacker.x);
+      activeAttacksRef.current = {
+        ...activeAttacksRef.current,
+        [attackerId]: { angle, startTime: Date.now() },
+      };
 
-      setActiveAttacks((prev) => ({
-        ...prev,
-        [attackerId]: { angle, startTime },
-      }));
       setTimeout(() => {
-        setActiveAttacks((prev) => {
-          const next = { ...prev };
-          delete next[attackerId];
-          return next;
-        });
+        const next = { ...activeAttacksRef.current };
+        delete next[attackerId];
+        activeAttacksRef.current = next;
       }, 360);
     });
     return unsub;
   }, [myPlayerId]);
 
-  return activeAttacks;
+  return activeAttacksRef;
 }

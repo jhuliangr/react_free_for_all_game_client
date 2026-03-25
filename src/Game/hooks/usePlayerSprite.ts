@@ -1,13 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 export function usePlayerSprite(selectedCharacter: string) {
-  const [sprite, setSprite] = useState<HTMLImageElement | null>(null);
+  const spriteRef = useRef<HTMLImageElement | null>(null);
 
   useEffect(() => {
+    spriteRef.current = null;
     const img = new Image();
     img.src = `/assets/sprites/${selectedCharacter.toLowerCase()}-default-idle.png`;
-    img.onload = () => setSprite(img);
+    img.onload = () => {
+      spriteRef.current = img;
+    };
   }, [selectedCharacter]);
 
-  return sprite;
+  return spriteRef;
 }

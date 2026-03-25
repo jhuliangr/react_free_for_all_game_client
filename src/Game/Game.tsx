@@ -23,21 +23,13 @@ export function Game() {
   const { myPlayerId, players } = useGameStore();
   const me = myPlayerId ? players[myPlayerId] : null;
 
-  const sprite = usePlayerSprite(selectedCharacter);
-  const activeAttacks = useOtherPlayersAttacks(myPlayerId);
+  const spriteRef = usePlayerSprite(selectedCharacter);
+  const activeAttacksRef = useOtherPlayersAttacks(myPlayerId);
   const { playSlice } = useSoundEffects();
-  const { attackProgress, handleCanvasClick } = useAttackAnimation(playSlice);
+  const { attackFlashRef, handleCanvasClick } = useAttackAnimation(playSlice);
 
   useDeathDetection(me, leave);
-  useCanvasRenderer(
-    canvasRef,
-    players,
-    me,
-    myPlayerId,
-    sprite,
-    attackProgress,
-    activeAttacks,
-  );
+  useCanvasRenderer(canvasRef, spriteRef, attackFlashRef, activeAttacksRef);
 
   if (!joined) return <JoinGameForm />;
 
