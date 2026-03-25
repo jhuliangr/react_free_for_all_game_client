@@ -12,6 +12,7 @@ export const AppRoutes = () => {
         <Route index Component={MainMenu} />
         <Route path="/play" Component={Game} />
         <Route path="/achivements" Component={ComingSoon} />
+        <Route path="/game-over" Component={ComingSoon} />
         <Route path="/settings" Component={Settings} />
       </Route>
       <Route path="*" Component={NotFound} />

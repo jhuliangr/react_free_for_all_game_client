@@ -6,12 +6,13 @@ import {
 } from '#shared/services/websocket';
 import { useGameStore } from '#shared/stores';
 import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
 
 export function useSocketSubscribe() {
   const [joined, setJoined] = useState(false);
   const { setMyPlayerId, applyStateUpdate, setCombatEvent, reset } =
     useGameStore();
-
+  const navigate = useNavigate();
   useEffect(() => {
     gameSocket.connect();
 
@@ -46,7 +47,10 @@ export function useSocketSubscribe() {
     gameSocket.connect();
     reset();
     setJoined(false);
-  }, [reset]);
+    navigate('/game-over', {
+      replace: true,
+    });
+  }, [reset, navigate]);
 
   return { joined, leave };
 }
