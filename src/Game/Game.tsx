@@ -11,6 +11,7 @@ import {
   useOtherPlayersAttacks,
   usePlayerSprite,
   useSocketSubscribe,
+  useSoundEffects,
 } from './hooks';
 
 export function Game() {
@@ -24,7 +25,8 @@ export function Game() {
 
   const sprite = usePlayerSprite(selectedCharacter);
   const activeAttacks = useOtherPlayersAttacks(myPlayerId);
-  const { attackProgress, handleCanvasClick } = useAttackAnimation();
+  const { playSlice } = useSoundEffects();
+  const { attackProgress, handleCanvasClick } = useAttackAnimation(playSlice);
 
   useDeathDetection(me, leave);
   useCanvasRenderer(

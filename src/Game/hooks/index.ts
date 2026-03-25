@@ -5,3 +5,4 @@ export { useKeyboardMapping } from './useKeyboardMapping';
 export { useOtherPlayersAttacks } from './useOtherPlayersAttacks';
 export { usePlayerSprite } from './usePlayerSprite';
 export { useSocketSubscribe } from './useSocketSubscribe';
+export { useSoundEffects } from './useSoundEffects';

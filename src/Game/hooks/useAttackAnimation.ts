@@ -2,7 +2,7 @@ import { gameSocket } from '#shared/services/websocket';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 
-export function useAttackAnimation() {
+export function useAttackAnimation(onAttack?: () => void) {
   const [attackProgress, setAttackProgress] = useState<{
     angle: number;
     progress: number;
@@ -25,6 +25,7 @@ export function useAttackAnimation() {
     );
 
     gameSocket.attack(angle);
+    onAttack?.();
 
     if (rAFRef.current) cancelAnimationFrame(rAFRef.current);
     const startTime = performance.now();
