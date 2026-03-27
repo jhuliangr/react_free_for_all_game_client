@@ -3,12 +3,11 @@ import { AppRoutes } from './routes';
 
 function App() {
   return (
-    <>
-      <h1>React client</h1>
-      <BrowserRouter basename={import.meta.env.BASE_URL}>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
+      <main>
         <AppRoutes />
-      </BrowserRouter>
-    </>
+      </main>
+    </BrowserRouter>
   );
 }
 
