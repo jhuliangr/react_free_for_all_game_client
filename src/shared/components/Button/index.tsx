@@ -17,8 +17,8 @@ export const Button: React.FC<Props> = ({
       className={cn(
         'w-full px-3 py-1 rounded-md transition-colors duration-200',
         {
-          primary: 'bg-blue-500 hover:bg-blue-400 text-white',
-          secondary: 'bg-gray-200 hover:bg-gray-100 text-black',
+          primary: 'bg-blue-500 disabled:bg-blue-300 hover:bg-blue-400 disabled:hover:bg-blue-300 text-white',
+          secondary: 'bg-gray-200 disabled:bg-gray-100 hover:bg-gray-100 disabled:hover:bg-gray-100 text-black',
         }[variant],
         className,
       )}
