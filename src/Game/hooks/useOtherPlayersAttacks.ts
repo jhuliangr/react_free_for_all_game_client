@@ -1,9 +1,14 @@
-import { gameSocket, type CombatEventMessage } from '#shared/services/websocket';
+import {
+  gameSocket,
+  type CombatEventMessage,
+} from '#shared/services/websocket';
 import { useGameStore } from '#shared/stores';
 import { useEffect, useRef } from 'react';
 
 export function useOtherPlayersAttacks(myPlayerId: string | null) {
-  const activeAttacksRef = useRef<Record<string, { angle: number; startTime: number }>>({});
+  const activeAttacksRef = useRef<
+    Record<string, { angle: number; startTime: number }>
+  >({});
 
   useEffect(() => {
     const unsub = gameSocket.onMessage((msg) => {
@@ -16,7 +21,10 @@ export function useOtherPlayersAttacks(myPlayerId: string | null) {
       const defender = players[defenderId];
       if (!attacker || !defender) return;
 
-      const angle = Math.atan2(defender.y - attacker.y, defender.x - attacker.x);
+      const angle = Math.atan2(
+        defender.y - attacker.y,
+        defender.x - attacker.x,
+      );
       activeAttacksRef.current = {
         ...activeAttacksRef.current,
         [attackerId]: { angle, startTime: Date.now() },

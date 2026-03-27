@@ -18,7 +18,9 @@ export function useCanvasRenderer(
   canvasRef: RefObject<HTMLCanvasElement | null>,
   spriteRef: RefObject<HTMLImageElement | null>,
   attackFlashRef: RefObject<{ angle: number; startTime: number } | null>,
-  activeAttacksRef: RefObject<Record<string, { angle: number; startTime: number }>>,
+  activeAttacksRef: RefObject<
+    Record<string, { angle: number; startTime: number }>
+  >,
 ) {
   useEffect(() => {
     let rafId: number;
@@ -45,7 +47,14 @@ export function useCanvasRenderer(
 
           ctx.font = '11px sans-serif';
           Object.values(players).forEach((p) =>
-            renderPlayer(p, ctx!, offsetX, offsetY, myPlayerId!, spriteRef.current!),
+            renderPlayer(
+              p,
+              ctx!,
+              offsetX,
+              offsetY,
+              myPlayerId!,
+              spriteRef.current!,
+            ),
           );
 
           const flash = attackFlashRef.current;

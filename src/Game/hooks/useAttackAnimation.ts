@@ -5,13 +5,18 @@ import { useRef } from 'react';
 const ATTACK_DURATION_MS = 150;
 
 export function useAttackAnimation(onAttack?: () => void) {
-  const attackFlashRef = useRef<{ angle: number; startTime: number } | null>(null);
+  const attackFlashRef = useRef<{ angle: number; startTime: number } | null>(
+    null,
+  );
 
   const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const cx = rect.width / 2;
     const cy = rect.height / 2;
-    const angle = Math.atan2(e.clientY - rect.top - cy, e.clientX - rect.left - cx);
+    const angle = Math.atan2(
+      e.clientY - rect.top - cy,
+      e.clientX - rect.left - cx,
+    );
 
     gameSocket.attack(angle);
     onAttack?.();

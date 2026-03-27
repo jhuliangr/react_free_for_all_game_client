@@ -1,4 +1,7 @@
-import { gameSocket, type CombatEventMessage } from '#shared/services/websocket';
+import {
+  gameSocket,
+  type CombatEventMessage,
+} from '#shared/services/websocket';
 import { useGameStore } from '#shared/stores';
 import { useEffect, useRef } from 'react';
 
@@ -40,7 +43,9 @@ export function useSoundEffects() {
       hitRef.current = hit;
     });
 
-    return () => { ctx.close(); };
+    return () => {
+      ctx.close();
+    };
   }, []);
 
   useEffect(() => {
@@ -49,13 +54,15 @@ export function useSoundEffects() {
       const { attackerId, defenderId } = msg as CombatEventMessage;
       const { myPlayerId } = useGameStore.getState();
       if (attackerId !== myPlayerId && defenderId !== myPlayerId) return;
-      if (ctxRef.current && hitRef.current) playBuffer(ctxRef.current, hitRef.current);
+      if (ctxRef.current && hitRef.current)
+        playBuffer(ctxRef.current, hitRef.current);
     });
     return unsub;
   }, []);
 
   const playSlice = () => {
-    if (ctxRef.current && sliceRef.current) playBuffer(ctxRef.current, sliceRef.current);
+    if (ctxRef.current && sliceRef.current)
+      playBuffer(ctxRef.current, sliceRef.current);
   };
 
   return { playSlice };
