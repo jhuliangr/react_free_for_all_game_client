@@ -5,7 +5,6 @@ import { FetchSettingsComponent } from './FetchComponent';
 export const MainMenu: React.FC = () => {
   return (
     <div className="flex items-center justify-center flex-1">
-      <title>Game</title>
       <FetchSettingsComponent />
       <Box>
         <Link to="/play">

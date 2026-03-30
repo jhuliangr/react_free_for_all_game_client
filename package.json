@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "analyze": "tsc -b && vite-bundle-analyzer",
     "lint": "eslint .",
     "preview": "vite preview",
     "lint-detect": "eslint",
@@ -62,6 +63,7 @@
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.56.1",
     "vite": "^8.0.0",
+    "vite-bundle-analyzer": "^1.3.6",
     "vitest": "^4.1.0"
   }
 }

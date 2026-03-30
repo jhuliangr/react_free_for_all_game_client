@@ -6,6 +6,12 @@ A top-down real-time multiplayer arena game built with React, TypeScript, and We
 
 ---
 
+| Main Menu                                                                               | In Game                                                                               |
+| --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| ![Main menu](https://res.cloudinary.com/dfoqeafey/image/upload/v1774854864/react-1.png) | ![In Game](https://res.cloudinary.com/dfoqeafey/image/upload/v1774854880/react-2.png) |
+
+---
+
 ## Features
 
 - Real-time multiplayer over WebSocket with per-message deflate compression
