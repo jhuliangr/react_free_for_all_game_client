@@ -19,7 +19,9 @@
     "test": "vitest",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "prepare": "husky"
+    "prepare": "husky",
+    "pw": "pnpm exec playwright test --ui",
+    "pw-headless": "pnpm exec playwright test"
   },
   "dependencies": {
     "react": "^19.2.4",
@@ -39,6 +41,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
+    "@playwright/test": "^1.58.2",
     "@storybook/react": "^10.3.3",
     "@storybook/react-vite": "^10.3.3",
     "@tailwindcss/vite": "^4.2.1",
