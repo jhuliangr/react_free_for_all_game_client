@@ -1,0 +1,1 @@
+export { useGetGameSettings } from './useGetGameSettings';
