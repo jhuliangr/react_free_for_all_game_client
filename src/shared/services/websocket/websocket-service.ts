@@ -3,6 +3,7 @@ import type { MessageHandler, ServerMessage } from './schemas';
 export class GameSocket {
   private ws: WebSocket | null = null;
   private handlers: MessageHandler[] = [];
+  private closeHandlers: (() => void)[] = [];
   private queue: object[] = [];
 
   connect(url = 'wss://homework-hs.site/ws') {
@@ -18,7 +19,13 @@ export class GameSocket {
       this.handlers.forEach((h) => h(msg));
     };
 
-    this.ws.onclose = () => console.log('WebSocket closed');
+    this.ws.onclose = () => {
+      console.log('WebSocket closed');
+      // this.ws is null only after an intentional disconnect() call
+      if (this.ws !== null) {
+        this.closeHandlers.forEach((h) => h());
+      }
+    };
     this.ws.onerror = (e) => console.error('WebSocket error', e);
   }
 
@@ -26,6 +33,13 @@ export class GameSocket {
     this.handlers.push(handler);
     return () => {
       this.handlers = this.handlers.filter((h) => h !== handler);
+    };
+  }
+
+  onClose(handler: () => void) {
+    this.closeHandlers.push(handler);
+    return () => {
+      this.closeHandlers = this.closeHandlers.filter((h) => h !== handler);
     };
   }
 

@@ -21,13 +21,13 @@ export const JoinGameForm = () => {
   return (
     <form
       ref={formRef}
-      className="flex border p-2 mx-auto rounded-md gap-3"
+      className="flex border p-2 mx-auto rounded-md gap-3 bg-secondary"
       onSubmit={handleSubmit}
     >
       <input
         name="name"
         placeholder="Your name"
-        className="px-3 py-1 rounded-md"
+        className="px-3 py-1 rounded-md bg-white"
       />
       <Button type="submit">Join</Button>
     </form>

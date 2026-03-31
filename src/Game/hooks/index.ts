@@ -1,4 +1,5 @@
 export { useAttackAnimation } from './useAttackAnimation';
+export { useBackgroundImage } from './useBackgroundImage';
 export { useCanvasRenderer } from './useCanvasRenderer';
 export { useDeathDetection } from './useDeathDetection';
 export { useKeyboardMapping } from './useKeyboardMapping';

@@ -6,10 +6,10 @@ export const EventLog = () => {
     return null;
   }
   return (
-    <div className="absolute text-right right-5 top-5">
+    <div className="absolute text-right right-5 top-5 text-white">
       {lastCombatEvent.attackerId === myPlayerId
-        ? `Pegaste ${lastCombatEvent.damage.toFixed(1)} de daño`
-        : `Recibiste ${lastCombatEvent.damage.toFixed(1)} de daño`}
+        ? `Hit ${lastCombatEvent.damage.toFixed(1)} damage`
+        : `Received ${lastCombatEvent.damage.toFixed(1)} damage`}
     </div>
   );
 };

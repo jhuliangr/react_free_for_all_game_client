@@ -16,7 +16,7 @@ export function useSocketSubscribe() {
   useEffect(() => {
     gameSocket.connect();
 
-    const unsub = gameSocket.onMessage((msg) => {
+    const unsubMessage = gameSocket.onMessage((msg) => {
       switch (msg.type) {
         case 'welcome': {
           const welcome = msg as WelcomeMessage;
@@ -36,11 +36,18 @@ export function useSocketSubscribe() {
       }
     });
 
+    const unsubClose = gameSocket.onClose(() => {
+      gameSocket.connect();
+      reset();
+      setJoined(false);
+    });
+
     return () => {
-      unsub();
+      unsubMessage();
+      unsubClose();
       gameSocket.disconnect();
     };
-  }, [setCombatEvent, setMyPlayerId, applyStateUpdate]);
+  }, [setCombatEvent, setMyPlayerId, applyStateUpdate, reset]);
 
   const leave = useCallback(() => {
     gameSocket.disconnect();
