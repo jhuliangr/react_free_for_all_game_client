@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('Main flow works fine', async ({ page }) => {
   await page.goto('http://localhost:5173/');
-  await page.getByRole('button', { name: 'Play' }).click();
+  await page.getByRole('button', { name: 'Playing' }).click();
   const input = page.getByPlaceholder('Your name');
   await expect(input).toBeVisible();
   const playerName: string = 'playerName';
