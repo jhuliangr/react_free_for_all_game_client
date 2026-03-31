@@ -5,8 +5,9 @@ test('Main flow works fine', async ({ page }) => {
   await page.getByRole('button', { name: 'Play' }).click();
   const input = page.getByPlaceholder('Your name');
   await expect(input).toBeVisible();
-  await input.fill('jamonado');
-  await expect(input).toHaveValue('jamonado');
+  const playerName: string = 'playerName';
+  await input.fill(playerName);
+  await expect(input).toHaveValue(playerName);
   await page.keyboard.press('Enter');
   await expect(page.getByText('HP: 100 / 100')).toBeVisible();
   expect(page.locator('canvas')).toBeVisible();
