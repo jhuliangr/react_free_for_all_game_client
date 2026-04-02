@@ -75,9 +75,5 @@ export default defineConfig({
     command: 'pnpm dev',
     url: 'http://localhost:5173/',
     reuseExistingServer: !process.env.CI,
-    env: {
-      VITE_SERVER_LINK: process.env.VITE_SERVER_LINK ?? '',
-      VITE_WS_SERVER: process.env.VITE_WS_SERVER ?? '',
-    },
   },
 });
