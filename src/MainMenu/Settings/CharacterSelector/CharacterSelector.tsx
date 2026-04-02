@@ -14,9 +14,10 @@ export const CharacterSelector: React.FC = () => {
       {AVAILABLE_CHARACTERS.map((character, i) => (
         <div
           className={cn(
-            'font-bold text-xl border-2 p-2 rounded-full cursor-pointer',
+            'font-bold text-xl border-2 p-2 rounded-full cursor-pointer select-none',
             {
-              'border-black bg-lime-100': selectedCharacter === character,
+              'border-2 border-primary text-primary':
+                selectedCharacter === character,
             },
           )}
           key={`${character}_${i}`}

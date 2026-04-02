@@ -7,7 +7,7 @@ import {
 import { useGetGameSettings } from '#shared/hooks';
 import { Link } from 'react-router';
 
-export const MainMenu: React.FC = () => {
+export const MainMenu = () => {
   const { loading, error } = useGetGameSettings();
   return (
     <div className="flex items-center justify-center flex-1">

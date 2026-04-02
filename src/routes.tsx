@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router';
 import { LoadingComponent } from '#shared/components';
+import { GameOver } from './GameOver';
 
 const MainMenu = lazy(() =>
   import('./MainMenu').then((m) => ({ default: m.MainMenu })),
@@ -24,7 +25,7 @@ export const AppRoutes = () => {
           <Route index Component={MainMenu} />
           <Route path="/play" Component={Game} />
           <Route path="/achivements" Component={ComingSoon} />
-          <Route path="/game-over" Component={ComingSoon} />
+          <Route path="/game-over" Component={GameOver} />
           <Route path="/settings" Component={Settings} />
         </Route>
         <Route path="*" Component={NotFound} />

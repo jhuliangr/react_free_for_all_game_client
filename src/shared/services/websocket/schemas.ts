@@ -11,6 +11,7 @@ export const PlayerSchema = z.object({
   xp: z.number(),
   skin: z.string(),
   weapon: z.string(),
+  character: z.string(),
 });
 
 export type Player = z.infer<typeof PlayerSchema>;

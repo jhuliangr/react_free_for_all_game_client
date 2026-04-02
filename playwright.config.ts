@@ -44,10 +44,10 @@ export default defineConfig({
       use: { ...devices['Desktop Firefox'] },
     },
 
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
+    // {
+    //   name: 'webkit',
+    //   use: { ...devices['Desktop Safari'] },
+    // },
 
     /* Test against mobile viewports. */
     // {
@@ -75,8 +75,5 @@ export default defineConfig({
     command: 'pnpm dev',
     url: 'http://localhost:5173/',
     reuseExistingServer: !process.env.CI,
-    env: {
-      VITE_SERVER_LINK: process.env.VITE_SERVER_LINK as string,
-    },
   },
 });

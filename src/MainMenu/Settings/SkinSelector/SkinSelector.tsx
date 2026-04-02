@@ -15,7 +15,7 @@ export const SkinSelector: React.FC = () => {
     }
   };
   return (
-    <div className="flex gap-3 bg-gray-200 rounded-xl">
+    <div className="flex gap-3 rounded-xl">
       {skins.map((skin) => (
         <img
           key={skin.id}

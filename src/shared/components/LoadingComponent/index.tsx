@@ -9,7 +9,7 @@ export const LoadingComponent: React.FC<Props> = ({ size = 'huge' }) => {
     <div
       title="Loading..."
       className={cn(
-        'rounded-full bg-transparent border-top border-t-4 border-l-4 border-teal-400 animate-spin w-full mx-auto',
+        'rounded-full bg-transparent border-top border-t-4 border-l-4 border-primary animate-spin w-full mx-auto',
         {
           huge: 'size-20',
           medium: 'size-10',

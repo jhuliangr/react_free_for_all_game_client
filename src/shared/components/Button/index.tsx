@@ -15,12 +15,12 @@ export const Button: React.FC<Props> = ({
   return (
     <button
       className={cn(
-        'w-full px-3 py-1 rounded-md transition-colors duration-200',
+        'w-full px-3 py-1 rounded-md transition-opacity duration-200',
         {
           primary:
-            'bg-blue-500 disabled:bg-blue-300 hover:bg-blue-400 disabled:hover:bg-blue-300 text-white',
+            'bg-primary disabled:opacity-80 hover:opacity-80 disabled:cursor-not-allowed text-white',
           secondary:
-            'bg-gray-200 disabled:bg-gray-100 hover:bg-gray-100 disabled:hover:bg-gray-100 text-black',
+            'bg-secondary disabled:opacity-80 hover:opacity-80 text-white',
         }[variant],
         className,
       )}
