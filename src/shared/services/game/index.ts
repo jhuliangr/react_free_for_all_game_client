@@ -4,4 +4,5 @@ export type {
   Skin,
   Weapon,
   Achivement,
+  Character,
 } from './schemas';

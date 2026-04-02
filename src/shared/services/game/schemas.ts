@@ -48,11 +48,19 @@ export const WeaponSchema = z.object({
 
 export type Weapon = z.infer<typeof WeaponSchema>;
 
+export const CharacterSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+});
+
+export type Character = z.infer<typeof CharacterSchema>;
+
 export const GetGameServerInfoResponseSchema = z.object({
   achievements: z.array(AchivementSchema),
   gameRules: GameRulesSchema,
   skins: z.array(SkinSchema),
   weapons: z.array(WeaponSchema),
+  characters: z.array(CharacterSchema),
 });
 
 export type GetGameServerInfoResponse = z.infer<
