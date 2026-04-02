@@ -14,9 +14,10 @@ import {
   useSocketSubscribe,
   useSoundEffects,
 } from './hooks';
+import { Button } from '#shared/components';
 
 export function Game() {
-  const { joined, leave } = useSocketSubscribe();
+  const { joined, reconnecting, join, leave, lost } = useSocketSubscribe();
   useKeyboardMapping(joined);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -29,7 +30,7 @@ export function Game() {
   const { playSlice } = useSoundEffects();
   const { attackFlashRef, handleCanvasClick } = useAttackAnimation(playSlice);
 
-  useDeathDetection(me, leave);
+  useDeathDetection(me, lost);
   useCanvasRenderer(
     canvasRef,
     spriteRef,
@@ -38,7 +39,15 @@ export function Game() {
     bgImageRef,
   );
 
-  if (!joined) return <JoinGameForm />;
+  if (reconnecting) {
+    return (
+      <div className="flex items-center justify-center gap-3 p-4 bg-secondary rounded-md mx-auto">
+        <p className="text-white">Reconnecting...</p>
+      </div>
+    );
+  }
+
+  if (!joined) return <JoinGameForm onJoin={join} />;
 
   return (
     <div className="max-w-200 max-h-150 mx-auto relative">
@@ -47,6 +56,13 @@ export function Game() {
       <p className="absolute top-1 right-5 font-light text-xs text-white">
         x:{me?.x.toFixed(2)} y:{me?.y.toFixed(2)}
       </p>
+      <Button
+        variant="secondary"
+        className="absolute max-w-fit right-0 bottom-0"
+        onClick={() => leave()}
+      >
+        Disconnect
+      </Button>
       <canvas
         width={800}
         height={600}

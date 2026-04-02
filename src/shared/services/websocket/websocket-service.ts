@@ -4,9 +4,20 @@ export class GameSocket {
   private ws: WebSocket | null = null;
   private handlers: MessageHandler[] = [];
   private closeHandlers: (() => void)[] = [];
+  private reconnectFailHandlers: (() => void)[] = [];
   private queue: object[] = [];
+  private url = import.meta.env.VITE_WS_SERVER;
+  private reconnecting = false;
+  private reconnectAttempt = 0;
+  private readonly maxReconnectAttempts = 5;
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
-  connect(url = 'wss://homework-hs.site/ws') {
+  get isReconnecting() {
+    return this.reconnecting;
+  }
+
+  connect(url = import.meta.env.VITE_WS_SERVER) {
+    this.url = url;
     this.ws = new WebSocket(url);
 
     this.ws.onopen = () => {
@@ -21,12 +32,64 @@ export class GameSocket {
 
     this.ws.onclose = () => {
       console.log('WebSocket closed');
-      // this.ws is null only after an intentional disconnect() call
       if (this.ws !== null) {
-        this.closeHandlers.forEach((h) => h());
+        this.attemptReconnect();
       }
     };
     this.ws.onerror = (e) => console.error('WebSocket error', e);
+  }
+
+  private attemptReconnect() {
+    if (
+      this.reconnecting &&
+      this.reconnectAttempt >= this.maxReconnectAttempts
+    ) {
+      this.reconnecting = false;
+      this.reconnectAttempt = 0;
+      console.log('Reconnection failed after max attempts');
+      this.reconnectFailHandlers.forEach((h) => h());
+      return;
+    }
+
+    this.reconnecting = true;
+    this.reconnectAttempt++;
+    const delay = Math.min(1000 * 2 ** (this.reconnectAttempt - 1), 8000);
+    console.log(
+      `Reconnecting attempt ${this.reconnectAttempt}/${this.maxReconnectAttempts} in ${delay}ms...`,
+    );
+
+    this.reconnectTimer = setTimeout(() => {
+      const ws = new WebSocket(this.url);
+
+      ws.onopen = () => {
+        console.log('Reconnected successfully');
+        this.ws = ws;
+        this.reconnecting = false;
+        this.reconnectAttempt = 0;
+        this.queue.forEach((msg) => this.ws!.send(JSON.stringify(msg)));
+        this.queue = [];
+
+        ws.onmessage = (event) => {
+          const msg: ServerMessage = JSON.parse(event.data);
+          this.handlers.forEach((h) => h(msg));
+        };
+
+        ws.onclose = () => {
+          console.log('WebSocket closed');
+          if (this.ws !== null) {
+            this.attemptReconnect();
+          }
+        };
+        ws.onerror = (e) => console.error('WebSocket error', e);
+
+        this.closeHandlers.forEach((h) => h());
+      };
+
+      ws.onerror = () => {
+        ws.close();
+        this.attemptReconnect();
+      };
+    }, delay);
   }
 
   onMessage(handler: MessageHandler) {
@@ -43,6 +106,15 @@ export class GameSocket {
     };
   }
 
+  onReconnectFail(handler: () => void) {
+    this.reconnectFailHandlers.push(handler);
+    return () => {
+      this.reconnectFailHandlers = this.reconnectFailHandlers.filter(
+        (h) => h !== handler,
+      );
+    };
+  }
+
   join(name: string) {
     return this.send({ type: 'join', name });
   }
@@ -55,11 +127,17 @@ export class GameSocket {
     this.send({ type: 'attack', angle });
   }
 
-  equip(slot: 'skin' | 'weapon', itemId: string) {
+  equip(slot: 'skin' | 'weapon' | 'character', itemId: string) {
     this.send({ type: 'equip', slot, itemId });
   }
 
   disconnect() {
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+    this.reconnecting = false;
+    this.reconnectAttempt = 0;
     this.queue = [];
     const ws = this.ws;
     this.ws = null;

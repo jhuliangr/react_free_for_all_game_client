@@ -1,8 +1,16 @@
 import { Button } from '#shared/components';
 import { gameSocket } from '#shared/services/websocket';
+import { useSettingsStore } from '#shared/stores';
 import { useRef } from 'react';
+import { useNavigate } from 'react-router';
 
-export const JoinGameForm = () => {
+interface JoinGameFormProps {
+  onJoin: (name: string) => void;
+}
+
+export const JoinGameForm = ({ onJoin }: JoinGameFormProps) => {
+  const navigate = useNavigate();
+  const selectedSkin = useSettingsStore((state) => state.selectedCharacter);
   const formRef = useRef<HTMLFormElement>(null);
   const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -16,7 +24,8 @@ export const JoinGameForm = () => {
       alert('Your character must have a name');
       return;
     }
-    gameSocket.join(data.name as string);
+    onJoin(data.name as string);
+    gameSocket.equip('character', selectedSkin.toLowerCase());
   };
   return (
     <form
@@ -24,6 +33,17 @@ export const JoinGameForm = () => {
       className="flex border p-2 mx-auto rounded-md gap-3 bg-secondary"
       onSubmit={handleSubmit}
     >
+      <Button
+        type="button"
+        variant="secondary"
+        onClick={() =>
+          navigate('/', {
+            replace: true,
+          })
+        }
+      >
+        Back
+      </Button>
       <input
         name="name"
         placeholder="Your name"
