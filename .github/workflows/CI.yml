@@ -43,6 +43,10 @@ jobs:
       run: npm install -g pnpm && pnpm install
     - name: Install Playwright Browsers
       run: pnpm exec playwright install --with-deps
+    - name: Create .env
+      run: |
+        echo "VITE_SERVER_LINK=${{ secrets.VITE_SERVER_LINK }}" >> .env
+        echo "VITE_WS_SERVER=${{ secrets.VITE_WS_SERVER }}" >> .env
     - name: Run Playwright tests
       run: pnpm pw-headless
     - uses: actions/upload-artifact@v4
