@@ -5,6 +5,7 @@ import type { SettingsStoreState } from './types/SettingsStoreState';
 export const useSettingsStore = create<SettingsStoreState>()(
   persist(
     (set, get) => ({
+      characters: [{ id: '', name: '' }],
       selectedCharacter: 'Knight',
       selectedSkin: null,
       unlockedAchivements: null,
