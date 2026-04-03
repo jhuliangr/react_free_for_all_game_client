@@ -17,7 +17,6 @@ export const renderPlayer = (
 ) => {
   const sx = p.x * SCALE_X + offsetX;
   const sy = p.y * SCALE_Y + offsetY;
-  console.log('==> ', sprites[p.character], p.character);
   const sprite = sprites[p.character] ?? Object.values(sprites)[0];
 
   if (sprite && import.meta.env.VITE_SPRITES === 'true') {
