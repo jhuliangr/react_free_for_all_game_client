@@ -1,5 +1,7 @@
 import type { Preview } from '@storybook/react';
 import '../src/index.css';
+import { withGameStore } from './decorators/withGameStore';
+import { withGameSettings } from './decorators/withGameSettings';
 
 const preview: Preview = {
   parameters: {
@@ -10,6 +12,7 @@ const preview: Preview = {
       },
     },
   },
+  decorators: [withGameStore, withGameSettings],
 };
 
 export default preview;

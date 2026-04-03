@@ -1,8 +1,7 @@
-import { useGameStore } from '#shared/stores';
 import { useRef } from 'react';
-import { EventLog } from './EventLog';
+import { useGameStore } from '#shared/stores';
 import { JoinGameForm } from './JoinGameForm';
-import { LifeAndXpIndicator } from './LifeAndXpIndicator';
+import { Hud } from './Hud';
 import {
   useAttackAnimation,
   useBackgroundImage,
@@ -14,10 +13,9 @@ import {
   useSocketSubscribe,
   useSoundEffects,
 } from './hooks';
-import { Button } from '#shared/components';
 
 export function Game() {
-  const { joined, reconnecting, join, leave, lost } = useSocketSubscribe();
+  const { joined, reconnecting, join, lost, leave } = useSocketSubscribe();
   useKeyboardMapping(joined);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -51,18 +49,7 @@ export function Game() {
 
   return (
     <div className="max-w-200 max-h-150 mx-auto relative">
-      <LifeAndXpIndicator />
-      <EventLog />
-      <p className="absolute top-1 right-5 font-light text-xs text-white">
-        x:{me?.x.toFixed(2)} y:{me?.y.toFixed(2)}
-      </p>
-      <Button
-        variant="secondary"
-        className="absolute max-w-fit right-0 bottom-0"
-        onClick={() => leave()}
-      >
-        Disconnect
-      </Button>
+      <Hud leave={leave} />
       <canvas
         width={800}
         height={600}

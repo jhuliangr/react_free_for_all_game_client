@@ -1,1 +1,0 @@
-export { LifeAndXpIndicator } from './LifeAndXpIndicator';
