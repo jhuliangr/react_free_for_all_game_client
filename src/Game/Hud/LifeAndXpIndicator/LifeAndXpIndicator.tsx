@@ -20,6 +20,9 @@ export const LifeAndXpIndicator: React.FC = () => {
       <div className="text-teal-400 font-bold">
         Level: {me.level} — XP: {me.xp.toFixed(0)} / {xpForLevel(me.level + 1)}
       </div>
+      <div className="text-amber-300 text-sm">
+        K: {me.kills ?? 0} / D: {me.deaths ?? 0}
+      </div>
     </div>
   );
 };
