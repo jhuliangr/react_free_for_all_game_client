@@ -115,9 +115,10 @@ export class GameSocket {
     };
   }
 
-  join(name: string, playerId?: string) {
+  join(name: string, playerId?: string, character?: string) {
     const msg: Record<string, string> = { type: 'join', name };
     if (playerId) msg.playerId = playerId;
+    if (character) msg.character = character;
     return this.send(msg);
   }
 

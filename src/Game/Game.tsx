@@ -15,7 +15,15 @@ import {
 } from './hooks';
 
 export function Game() {
-  const { joined, reconnecting, join, lost, leave } = useSocketSubscribe();
+  const {
+    joined,
+    reconnecting,
+    join,
+    lost,
+    leave,
+    lastUnlockedAchievement,
+    clearAchievementNotification,
+  } = useSocketSubscribe();
   useKeyboardMapping(joined);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -25,8 +33,9 @@ export function Game() {
   const spriteRef = usePlayerSprite();
   const bgImageRef = useBackgroundImage();
   const activeAttacksRef = useOtherPlayersAttacks(myPlayerId);
-  const { playSlice } = useSoundEffects();
-  const { attackFlashRef, handleCanvasClick } = useAttackAnimation(playSlice);
+  const { playAttackSound } = useSoundEffects();
+  const { attackFlashRef, handleCanvasClick, cooldownActiveRef } =
+    useAttackAnimation(playAttackSound);
 
   useDeathDetection(me, lost);
   useCanvasRenderer(
@@ -49,7 +58,12 @@ export function Game() {
 
   return (
     <div className="max-w-200 max-h-150 mx-auto relative">
-      <Hud leave={leave} />
+      <Hud
+        leave={leave}
+        cooldownActiveRef={cooldownActiveRef}
+        lastUnlockedAchievement={lastUnlockedAchievement}
+        onDismissAchievement={clearAchievementNotification}
+      />
       <canvas
         width={800}
         height={600}
