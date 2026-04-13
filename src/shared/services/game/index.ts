@@ -5,4 +5,5 @@ export type {
   Weapon,
   Achivement,
   Character,
+  CharacterStats,
 } from './schemas';

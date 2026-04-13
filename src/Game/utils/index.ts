@@ -6,6 +6,7 @@ export {
   WORLD_SIZE,
 } from './canvasConstants';
 export { renderAttack } from './renderAttack';
+export type { CharacterDefinition } from '../characters';
 export { renderBackground } from './renderBackground';
 export { renderGrid } from './renderGrid';
 export { renderMapBounds } from './renderMapBounds';
