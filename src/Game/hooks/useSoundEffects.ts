@@ -4,11 +4,20 @@ import {
 } from '#shared/services/websocket';
 import { useGameStore } from '#shared/stores';
 import { useEffect, useRef } from 'react';
+import { characterRegistry } from '../characters';
 
-async function loadSound(ctx: AudioContext, url: string): Promise<AudioBuffer> {
-  const res = await fetch(url);
-  const arrayBuffer = await res.arrayBuffer();
-  return ctx.decodeAudioData(arrayBuffer);
+async function loadSound(
+  ctx: AudioContext,
+  url: string,
+): Promise<AudioBuffer | null> {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const arrayBuffer = await res.arrayBuffer();
+    return ctx.decodeAudioData(arrayBuffer);
+  } catch {
+    return null;
+  }
 }
 
 function playBuffer(ctx: AudioContext, buffer: AudioBuffer) {
@@ -26,22 +35,27 @@ function playBuffer(ctx: AudioContext, buffer: AudioBuffer) {
   }
 }
 
+type CharacterSounds = {
+  attack: AudioBuffer | null;
+  hit: AudioBuffer | null;
+};
+
 export function useSoundEffects() {
   const ctxRef = useRef<AudioContext | null>(null);
-  const sliceRef = useRef<AudioBuffer | null>(null);
-  const hitRef = useRef<AudioBuffer | null>(null);
+  const soundsRef = useRef<Record<string, CharacterSounds>>({});
 
   useEffect(() => {
     const ctx = new AudioContext();
     ctxRef.current = ctx;
 
-    Promise.all([
-      loadSound(ctx, '/assets/sounds/sword-slice.mp3'),
-      loadSound(ctx, '/assets/sounds/sword-hit.mp3'),
-    ]).then(([slice, hit]) => {
-      sliceRef.current = slice;
-      hitRef.current = hit;
-    });
+    for (const charDef of characterRegistry.getAll()) {
+      Promise.all([
+        loadSound(ctx, charDef.getAttackSoundPath()),
+        loadSound(ctx, charDef.getHitSoundPath()),
+      ]).then(([attack, hit]) => {
+        soundsRef.current[charDef.id] = { attack, hit };
+      });
+    }
 
     return () => {
       ctx.close();
@@ -52,18 +66,25 @@ export function useSoundEffects() {
     const unsub = gameSocket.onMessage((msg) => {
       if (msg.type !== 'combat_event') return;
       const { attackerId, defenderId } = msg as CombatEventMessage;
-      const { myPlayerId } = useGameStore.getState();
+      const { myPlayerId, players } = useGameStore.getState();
       if (attackerId !== myPlayerId && defenderId !== myPlayerId) return;
-      if (ctxRef.current && hitRef.current)
-        playBuffer(ctxRef.current, hitRef.current);
+
+      const attacker = players[attackerId];
+      const charId = attacker?.character ?? 'knight';
+      const charSounds = soundsRef.current[charId];
+      if (ctxRef.current && charSounds?.hit) {
+        playBuffer(ctxRef.current, charSounds.hit);
+      }
     });
     return unsub;
   }, []);
 
-  const playSlice = () => {
-    if (ctxRef.current && sliceRef.current)
-      playBuffer(ctxRef.current, sliceRef.current);
+  const playAttackSound = (characterId: string) => {
+    const charSounds = soundsRef.current[characterId];
+    if (ctxRef.current && charSounds?.attack) {
+      playBuffer(ctxRef.current, charSounds.attack);
+    }
   };
 
-  return { playSlice };
+  return { playAttackSound };
 }
