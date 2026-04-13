@@ -14,7 +14,7 @@ export function useOtherPlayersAttacks(myPlayerId: string | null) {
     const unsub = gameSocket.onMessage((msg) => {
       if (msg.type !== 'combat_event') return;
       const { attackerId, defenderId } = msg as CombatEventMessage;
-      if (attackerId === myPlayerId) return;
+      if (attackerId === myPlayerId || attackerId === 'dot') return;
 
       const { players } = useGameStore.getState();
       const attacker = players[attackerId];
