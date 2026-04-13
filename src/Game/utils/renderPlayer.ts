@@ -1,4 +1,5 @@
 import type { Player } from '#shared/services/websocket';
+import { characterRegistry } from '../characters';
 import { SCALE_X, SCALE_Y } from './canvasConstants';
 
 const SPRITE_DEFAULT_ANGLE = Math.PI / 2;
@@ -14,6 +15,7 @@ export const renderPlayer = (
   sprites: Record<string, HTMLImageElement>,
   facingAngle: number,
   hitTime: number | null,
+  dotStartTime: number | null,
 ) => {
   const sx = p.x * SCALE_X + offsetX;
   const sy = p.y * SCALE_Y + offsetY;
@@ -47,6 +49,34 @@ export const renderPlayer = (
     ctx.fill();
   }
 
+  // Delegate character-specific player effects (e.g. DoT aura) to the registry
+  const charDef = characterRegistry.get(p.character);
+  if (charDef.renderPlayerEffect) {
+    charDef.renderPlayerEffect({
+      ctx,
+      player: p,
+      sx,
+      sy,
+      facingAngle,
+      hitTime,
+      dotStartTime,
+      isMe: p.id === playerId,
+    });
+  }
+
+  // Player name
   ctx.fillStyle = '#fff';
   ctx.fillText(p.name, sx - 20, sy - 25);
+
+  // HP bar below name
+  const barWidth = 40;
+  const barHeight = 4;
+  const barX = sx - barWidth / 2;
+  const barY = sy - 32;
+  const hpRatio = Math.max(0, p.hp / p.max_hp);
+
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+  ctx.fillRect(barX, barY, barWidth, barHeight);
+  ctx.fillStyle = hpRatio > 0.25 ? '#4ade80' : '#ef4444';
+  ctx.fillRect(barX, barY, barWidth * hpRatio, barHeight);
 };
