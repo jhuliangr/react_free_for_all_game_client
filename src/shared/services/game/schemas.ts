@@ -48,9 +48,26 @@ export const WeaponSchema = z.object({
 
 export type Weapon = z.infer<typeof WeaponSchema>;
 
+export const DotConfigSchema = z.object({
+  damage_per_sec: z.number(),
+  duration_sec: z.number(),
+});
+
+export const CharacterStatsSchema = z.object({
+  base_hp: z.number(),
+  base_damage: z.number(),
+  attack_range: z.number(),
+  knockback_distance: z.number(),
+  cooldown_ms: z.number(),
+  dot: z.union([z.literal(false), DotConfigSchema]),
+});
+
+export type CharacterStats = z.infer<typeof CharacterStatsSchema>;
+
 export const CharacterSchema = z.object({
   id: z.string(),
   name: z.string(),
+  stats: CharacterStatsSchema,
 });
 
 export type Character = z.infer<typeof CharacterSchema>;
