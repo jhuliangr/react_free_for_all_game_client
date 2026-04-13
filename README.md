@@ -54,16 +54,20 @@ BASE_URL=                                    # Optional base path for deployment
 
 ## Scripts
 
-| Script            | Command                 | Description                                                   |
-| ----------------- | ----------------------- | ------------------------------------------------------------- |
-| **dev**           | `npm run dev`           | Start the Vite dev server with HMR at `http://localhost:5173` |
-| **build**         | `npm run build`         | Type-check with `tsc` then bundle for production into `dist/` |
-| **preview**       | `npm run preview`       | Serve the production build locally to verify before deploying |
-| **test**          | `npm test`              | Run the test suite with Vitest                                |
-| **lint**          | `npm run lint`          | Run ESLint across all source files                            |
-| **lint-fix**      | `npm run lint-fix`      | Run ESLint and auto-fix fixable issues                        |
-| **format-detect** | `npm run format-detect` | Check formatting with Prettier without writing                |
-| **format-fix**    | `npm run format-fix`    | Auto-format all files with Prettier                           |
+| Script              | Command                 | Description                                                   |
+| ------------------- | ----------------------- | ------------------------------------------------------------- |
+| **dev**             | `npm run dev`           | Start the Vite dev server with HMR at `http://localhost:5173` |
+| **build**           | `npm run build`         | Type-check with `tsc` then bundle for production into `dist/` |
+| **preview**         | `npm run preview`       | Serve the production build locally to verify before deploying |
+| **test**            | `npm test`              | Run the test suite with Vitest                                |
+| **lint**            | `npm run lint`          | Run ESLint across all source files                            |
+| **lint-fix**        | `npm run lint-fix`      | Run ESLint and auto-fix fixable issues                        |
+| **format-detect**   | `npm run format-detect` | Check formatting with Prettier without writing                |
+| **format-fix**      | `npm run format-fix`    | Auto-format all files with Prettier                           |
+| **storybook**       | `npm run storybook`     | Run storybook                                                 |
+| **build-storybook** | `npm run storybook`     | Build storybook                                               |
+| **pw**              | `npm run pw`            | Run End2End tests with playwright                             |
+| **pw-headless**     | `npm run pw-headless`   | Run End2End tests with playwright without UI                  |
 
 ---
 
