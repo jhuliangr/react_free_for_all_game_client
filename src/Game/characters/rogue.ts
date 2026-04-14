@@ -13,15 +13,15 @@ const rogue: CharacterDefinition = {
   attackDurationMs: 100,
 
   getSpritePath(skinId) {
-    return `/assets/sprites/rogue-${skinId ?? 'default'}-sprite.png`;
+    return `${import.meta.env.BASE_URL}assets/sprites/rogue-${skinId ?? 'default'}-sprite.png`;
   },
 
   getAttackSoundPath() {
-    return '/assets/sounds/rogue-attack.mp3';
+    return `${import.meta.env.BASE_URL}assets/sounds/rogue-attack.mp3`;
   },
 
   getHitSoundPath() {
-    return '/assets/sounds/rogue-hit.mp3';
+    return `${import.meta.env.BASE_URL}assets/sounds/rogue-hit.mp3`;
   },
 
   renderAttack(rc: RenderContext) {

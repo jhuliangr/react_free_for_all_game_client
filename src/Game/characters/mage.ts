@@ -14,15 +14,15 @@ const mage: CharacterDefinition = {
   attackDurationMs: 150,
 
   getSpritePath(skinId) {
-    return `/assets/sprites/mage-${skinId ?? 'default'}-sprite.png`;
+    return `${import.meta.env.BASE_URL}assets/sprites/mage-${skinId ?? 'default'}-sprite.png`;
   },
 
   getAttackSoundPath() {
-    return '/assets/sounds/mage-attack.mp3';
+    return `${import.meta.env.BASE_URL}assets/sounds/mage-attack.mp3`;
   },
 
   getHitSoundPath() {
-    return '/assets/sounds/mage-hit.mp3';
+    return `${import.meta.env.BASE_URL}assets/sounds/mage-hit.mp3`;
   },
 
   renderAttack(rc: RenderContext) {
