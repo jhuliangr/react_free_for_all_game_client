@@ -1,6 +1,4 @@
 import { Button } from '#shared/components';
-import { gameSocket } from '#shared/services/websocket';
-import { useSettingsStore } from '#shared/stores';
 import { useRef } from 'react';
 import { useNavigate } from 'react-router';
 
@@ -10,7 +8,6 @@ interface JoinGameFormProps {
 
 export const JoinGameForm = ({ onJoin }: JoinGameFormProps) => {
   const navigate = useNavigate();
-  const selectedSkin = useSettingsStore((state) => state.selectedCharacter);
   const formRef = useRef<HTMLFormElement>(null);
   const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -25,7 +22,6 @@ export const JoinGameForm = ({ onJoin }: JoinGameFormProps) => {
       return;
     }
     onJoin(data.name as string);
-    gameSocket.equip('character', selectedSkin.toLowerCase());
   };
   return (
     <form

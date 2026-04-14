@@ -2,17 +2,18 @@ import type {
   GetGameServerInfoResponse,
   Skin,
   Weapon,
-  Achivement,
+  CharacterStats,
 } from '#shared/services/game';
 
 export type SettingsStoreState = GetGameServerInfoResponse & {
   selectedCharacter: string;
   selectedSkin: Skin | null;
-  unlockedAchivements: Achivement | null;
+  unlockedAchievementIds: string[];
   selectedWeapon: Weapon | null;
   setSelectedSkin: (skin: Skin) => void;
-  setUnlockedAchivements: (achivement: Achivement) => void;
+  unlockAchievement: (id: string) => boolean;
   setSelectedWeapon: (weapon: Weapon) => void;
   setSettingsFromServer: (settings: GetGameServerInfoResponse) => void;
   setSelectedCharacter: (character: string) => void;
+  getSelectedCharacterStats: () => CharacterStats;
 };

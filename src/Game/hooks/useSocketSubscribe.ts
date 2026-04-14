@@ -5,12 +5,30 @@ import {
   type WelcomeMessage,
 } from '#shared/services/websocket';
 import { useGameStore, useSettingsStore } from '#shared/stores';
+import type { Achivement } from '#shared/services/game';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
+
+function checkAchievements(kills: number, level: number): Achivement | null {
+  const { achievements, unlockedAchievementIds, unlockAchievement } =
+    useSettingsStore.getState();
+  const conditionChecks: Record<string, number> = { kills, level };
+  for (const ach of achievements) {
+    if (unlockedAchievementIds.includes(ach.id)) continue;
+    const playerValue = conditionChecks[ach.condition.type];
+    if (playerValue !== undefined && playerValue >= ach.condition.value) {
+      const isNew = unlockAchievement(ach.id);
+      if (isNew) return ach;
+    }
+  }
+  return null;
+}
 
 export function useSocketSubscribe() {
   const [joined, setJoined] = useState(false);
   const [reconnecting, setReconnecting] = useState(false);
+  const [lastUnlockedAchievement, setLastUnlockedAchievement] =
+    useState<Achivement | null>(null);
   const { setMyPlayerId, applyStateUpdate, setCombatEvent, reset } =
     useGameStore();
   const navigate = useNavigate();
@@ -32,6 +50,12 @@ export function useSocketSubscribe() {
         case 'state_update': {
           const update = msg as StateUpdateMessage;
           applyStateUpdate(update.players, update.removed ?? []);
+          const myId = useGameStore.getState().myPlayerId;
+          const me = myId ? useGameStore.getState().players[myId] : null;
+          if (me) {
+            const unlocked = checkAchievements(me.kills, me.level);
+            if (unlocked) setLastUnlockedAchievement(unlocked);
+          }
           break;
         }
         case 'combat_event':
@@ -45,8 +69,11 @@ export function useSocketSubscribe() {
         setReconnecting(true);
         const { selectedCharacter } = useSettingsStore.getState();
         const currentPlayerId = useGameStore.getState().myPlayerId;
-        gameSocket.join(playerNameRef.current, currentPlayerId ?? undefined);
-        gameSocket.equip('character', selectedCharacter.toLowerCase());
+        gameSocket.join(
+          playerNameRef.current,
+          currentPlayerId ?? undefined,
+          selectedCharacter,
+        );
       }
     });
 
@@ -67,7 +94,8 @@ export function useSocketSubscribe() {
 
   const join = useCallback((name: string) => {
     playerNameRef.current = name;
-    gameSocket.join(name);
+    const { selectedCharacter } = useSettingsStore.getState();
+    gameSocket.join(name, undefined, selectedCharacter);
   }, []);
 
   const leave = useCallback(() => {
@@ -92,5 +120,13 @@ export function useSocketSubscribe() {
     });
   }, [reset, navigate]);
 
-  return { joined, reconnecting, join, leave, lost };
+  return {
+    joined,
+    reconnecting,
+    join,
+    leave,
+    lost,
+    lastUnlockedAchievement,
+    clearAchievementNotification: () => setLastUnlockedAchievement(null),
+  };
 }

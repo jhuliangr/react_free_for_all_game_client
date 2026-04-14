@@ -28,6 +28,10 @@ export const MainMenu = () => {
               <Button>Play</Button>
             </Link>
 
+            <Link to="/achievements">
+              <Button>Achievements</Button>
+            </Link>
+
             <Link to="/settings">
               <Button>Settings</Button>
             </Link>

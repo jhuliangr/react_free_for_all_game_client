@@ -9,8 +9,8 @@ const MainMenu = lazy(() =>
 const NotFound = lazy(() =>
   import('./NotFound').then((m) => ({ default: m.NotFound })),
 );
-const ComingSoon = lazy(() =>
-  import('./ComingSoon').then((m) => ({ default: m.ComingSoon })),
+const Achievements = lazy(() =>
+  import('./Achievements').then((m) => ({ default: m.Achievements })),
 );
 const Settings = lazy(() =>
   import('./MainMenu/Settings').then((m) => ({ default: m.Settings })),
@@ -24,7 +24,7 @@ export const AppRoutes = () => {
         <Route path="/">
           <Route index Component={MainMenu} />
           <Route path="/play" Component={Game} />
-          <Route path="/achivements" Component={ComingSoon} />
+          <Route path="/achievements" Component={Achievements} />
           <Route path="/game-over" Component={GameOver} />
           <Route path="/settings" Component={Settings} />
         </Route>

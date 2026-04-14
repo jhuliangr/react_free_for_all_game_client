@@ -22,6 +22,8 @@ const basePlayer = {
   name: 'Hero',
   x: 0,
   y: 0,
+  kills: 0,
+  deaths: 0,
   skin: 'default',
   weapon: 'sword',
   character: 'warrior',

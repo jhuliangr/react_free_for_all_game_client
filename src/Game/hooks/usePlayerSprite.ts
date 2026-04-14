@@ -1,18 +1,18 @@
-import { AVAILABLE_CHARACTERS } from '#shared/constants';
 import { useEffect, useRef } from 'react';
+import { characterRegistry } from '../characters';
 
 export function usePlayerSprite() {
   const spritesRef = useRef<Record<string, HTMLImageElement>>({});
 
   useEffect(() => {
-    AVAILABLE_CHARACTERS.forEach((character) => {
-      const key = character.toLowerCase();
+    for (const charDef of characterRegistry.getAll()) {
+      const key = charDef.id;
       const img = new Image();
-      img.src = `/assets/sprites/${key}-default-sprite.png`;
+      img.src = charDef.getSpritePath();
       img.onload = () => {
         spritesRef.current[key] = img;
       };
-    });
+    }
   }, []);
 
   return spritesRef;
