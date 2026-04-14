@@ -5,7 +5,7 @@ export function useBackgroundImage() {
 
   useEffect(() => {
     const img = new Image();
-    img.src = '/assets/bg-1.png';
+    img.src = `${import.meta.env.BASE_URL}assets/bg-1.png`;
     img.onload = () => {
       bgImageRef.current = img;
     };

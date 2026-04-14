@@ -10,15 +10,15 @@ const golem: CharacterDefinition = {
   attackDurationMs: 200,
 
   getSpritePath(skinId) {
-    return `/assets/sprites/golem-${skinId ?? 'default'}-sprite.png`;
+    return `${import.meta.env.BASE_URL}assets/sprites/golem-${skinId ?? 'default'}-sprite.png`;
   },
 
   getAttackSoundPath() {
-    return '/assets/sounds/golem-attack.mp3';
+    return `${import.meta.env.BASE_URL}assets/sounds/golem-attack.mp3`;
   },
 
   getHitSoundPath() {
-    return '/assets/sounds/golem-hit.mp3';
+    return `${import.meta.env.BASE_URL}assets/sounds/golem-hit.mp3`;
   },
 
   renderAttack(rc: RenderContext) {

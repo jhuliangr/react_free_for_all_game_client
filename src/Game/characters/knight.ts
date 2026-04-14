@@ -12,15 +12,15 @@ const knight: CharacterDefinition = {
   attackDurationMs: 150,
 
   getSpritePath(skinId) {
-    return `/assets/sprites/knight-${skinId ?? 'default'}-sprite.png`;
+    return `${import.meta.env.BASE_URL}assets/sprites/knight-${skinId ?? 'default'}-sprite.png`;
   },
 
   getAttackSoundPath() {
-    return '/assets/sounds/knight-attack.mp3';
+    return `${import.meta.env.BASE_URL}assets/sounds/knight-attack.mp3`;
   },
 
   getHitSoundPath() {
-    return '/assets/sounds/knight-hit.mp3';
+    return `${import.meta.env.BASE_URL}assets/sounds/knight-hit.mp3`;
   },
 
   renderAttack(rc: RenderContext) {
