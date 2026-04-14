@@ -36,6 +36,7 @@ jobs:
         run: pnpm run format-detect
         
   test:
+    name: Test
     timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
@@ -54,10 +55,10 @@ jobs:
     # - name: Install Playwright Browsers
     #   run: pnpm exec playwright install --with-deps
 
-    - name: Create .env
-      run: |
-        echo "VITE_SERVER_LINK=${{ secrets.VITE_SERVER_LINK }}" >> .env
-        echo "VITE_WS_SERVER=${{ secrets.VITE_WS_SERVER }}" >> .env
+    # - name: Create .env
+    #   run: |
+    #     echo "VITE_SERVER_LINK=${{ secrets.VITE_SERVER_LINK }}" >> .env
+    #     echo "VITE_WS_SERVER=${{ secrets.VITE_WS_SERVER }}" >> .env
 
     - name: Test
       run: pnpm test
