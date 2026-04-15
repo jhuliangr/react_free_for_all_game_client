@@ -19,7 +19,7 @@ export const SkinSelector: React.FC = () => {
       {skins.map((skin) => (
         <img
           key={skin.id}
-          src={`/assets/${selectedCharacter.toLowerCase()}-${skin.id.replace('skin_', '')}-skin.png`}
+          src={`${import.meta.env.BASE_URL}assets/${selectedCharacter.toLowerCase()}-${skin.id.replace('skin_', '')}-skin.png`}
           alt={skin.name}
           className={cn(
             'w-36 cursor-pointer hover:opacity-80 transition-all duration-200 rounded-lg',
