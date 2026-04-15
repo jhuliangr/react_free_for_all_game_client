@@ -100,7 +100,7 @@ jobs:
           BASE_URL: /${{ github.event.repository.name }}/
           VITE_SERVER_LINK: ${{ secrets.VITE_SERVER_LINK }}
           VITE_WS_SERVER: ${{ secrets.VITE_WS_SERVER }}
-          VITE_SPRITES: ${{ secrets.VITE_WS_SERVER }}
+          VITE_SPRITES: ${{ secrets.VITE_SPRITES }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
