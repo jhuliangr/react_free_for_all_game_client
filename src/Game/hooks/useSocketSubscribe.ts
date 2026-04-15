@@ -41,6 +41,7 @@ export function useSocketSubscribe() {
       switch (msg.type) {
         case 'welcome': {
           const welcome = msg as WelcomeMessage;
+          reset();
           setMyPlayerId(welcome.playerId);
           applyStateUpdate([welcome.player], []);
           setJoined(true);
@@ -67,13 +68,9 @@ export function useSocketSubscribe() {
     const unsubClose = gameSocket.onClose(() => {
       if (playerNameRef.current) {
         setReconnecting(true);
+        reset();
         const { selectedCharacter } = useSettingsStore.getState();
-        const currentPlayerId = useGameStore.getState().myPlayerId;
-        gameSocket.join(
-          playerNameRef.current,
-          currentPlayerId ?? undefined,
-          selectedCharacter,
-        );
+        gameSocket.join(playerNameRef.current, undefined, selectedCharacter);
       }
     });
 
