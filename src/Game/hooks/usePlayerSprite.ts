@@ -8,7 +8,7 @@ export function usePlayerSprite() {
     for (const charDef of characterRegistry.getAll()) {
       const key = charDef.id;
       const img = new Image();
-      img.src = charDef.getSpritePath();
+      img.src = `${import.meta.env.BASE_URL}${charDef.getSpritePath()}`;
       img.onload = () => {
         spritesRef.current[key] = img;
       };
