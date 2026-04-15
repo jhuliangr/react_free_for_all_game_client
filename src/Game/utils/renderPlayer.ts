@@ -64,15 +64,15 @@ export const renderPlayer = (
     });
   }
 
-  // Player name
-  ctx.fillStyle = '#fff';
-  ctx.fillText(p.name, sx - 20, sy - 25);
-
-  // HP bar below name
+  // HP bar above player
   const barWidth = 40;
   const barHeight = 4;
   const barX = sx - barWidth / 2;
   const barY = sy - 32;
+
+  // Player name above HP bar
+  ctx.fillStyle = '#fff';
+  ctx.fillText(p.name, sx - 20, barY - 4);
   const hpRatio = Math.max(0, p.hp / p.max_hp);
 
   ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
