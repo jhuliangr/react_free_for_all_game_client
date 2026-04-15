@@ -2,10 +2,14 @@ import { characterRegistry } from './registry';
 import type { CharacterDefinition, RenderContext } from './types';
 
 const PLAYER_RADIUS = 12;
-const SPREAD = Math.PI / 4;
 
-/** Tracks slash direction per attacker — alternates left↔right */
-const slashDirection: Record<string, boolean> = {};
+/** Alternates left↔right by detecting when progress resets */
+const attackCount: Record<string, number> = {};
+const lastProgress: Record<string, number> = {};
+
+const STAB_REACH = 38;
+const BLADE_LENGTH = 18;
+const SIDE_OFFSET = Math.PI / 6;
 
 const rogue: CharacterDefinition = {
   id: 'rogue',
@@ -26,61 +30,70 @@ const rogue: CharacterDefinition = {
 
   renderAttack(rc: RenderContext) {
     const { ctx, cx, cy, angle, progress, attackerId } = rc;
-    const totalSweep = SPREAD * 1.5;
-    const sweptAngle = progress * totalSweep;
-    if (sweptAngle < 0.01) return;
 
-    // Alternate direction on each new attack
-    if (progress < 0.05) {
-      slashDirection[attackerId] = !slashDirection[attackerId];
+    // Alternate side: detect new attack when progress resets below last seen
+    const prev = lastProgress[attackerId] ?? 1;
+    lastProgress[attackerId] = progress;
+    if (progress < prev) {
+      attackCount[attackerId] = (attackCount[attackerId] ?? 0) + 1;
     }
-    const leftToRight = slashDirection[attackerId] ?? true;
+    const isLeft = (attackCount[attackerId] ?? 0) % 2 === 1;
+
+    // Stab thrust: quick extend then retract
+    // 0→0.4 extend, 0.4→1.0 retract
+    const thrust = progress < 0.4 ? progress / 0.4 : 1 - (progress - 0.4) / 0.6;
+    const reach = PLAYER_RADIUS + thrust * STAB_REACH;
+    const alpha = 0.85 * (1 - progress * 0.5);
+
+    const sideAngle = isLeft ? angle - SIDE_OFFSET : angle + SIDE_OFFSET;
+
+    // Offset origin perpendicular to attack angle (left or right of center)
+    const handOffset = 6;
+    const perpAngle = angle + (isLeft ? -Math.PI / 2 : Math.PI / 2);
+    const originX = cx + Math.cos(perpAngle) * handOffset;
+    const originY = cy + Math.sin(perpAngle) * handOffset;
+
+    const tipX = originX + Math.cos(sideAngle) * (reach + BLADE_LENGTH);
+    const tipY = originY + Math.sin(sideAngle) * (reach + BLADE_LENGTH);
+    const baseX = originX + Math.cos(sideAngle) * reach;
+    const baseY = originY + Math.sin(sideAngle) * reach;
+
+    // Perpendicular for blade width
+    const perpX = Math.cos(sideAngle + Math.PI / 2);
+    const perpY = Math.sin(sideAngle + Math.PI / 2);
+    const bladeWidth = 4.5;
 
     ctx.save();
 
-    const slashRange = 45;
-    const alpha = 0.7 * (1 - progress * 0.6);
-
-    let startAngle: number;
-    let currentAngle: number;
-
-    if (leftToRight) {
-      startAngle = angle - totalSweep / 2;
-      currentAngle = startAngle + sweptAngle;
-    } else {
-      startAngle = angle + totalSweep / 2;
-      currentAngle = startAngle - sweptAngle;
-    }
-
-    // Slash trail
-    const arcStart = Math.min(startAngle, currentAngle);
-    const arcEnd = Math.max(startAngle, currentAngle);
+    // Blade shape (narrow diamond)
     ctx.beginPath();
-    ctx.arc(cx, cy, slashRange, arcStart, arcEnd);
-    ctx.arc(cx, cy, PLAYER_RADIUS, arcEnd, arcStart, true);
+    ctx.moveTo(tipX, tipY);
+    ctx.lineTo(
+      baseX + (tipX - baseX) * 0.35 + perpX * bladeWidth,
+      baseY + (tipY - baseY) * 0.35 + perpY * bladeWidth,
+    );
+    ctx.lineTo(baseX, baseY);
+    ctx.lineTo(
+      baseX + (tipX - baseX) * 0.35 - perpX * bladeWidth,
+      baseY + (tipY - baseY) * 0.35 - perpY * bladeWidth,
+    );
     ctx.closePath();
-    ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.4})`;
+    ctx.fillStyle = `rgba(220, 220, 220, ${alpha})`;
     ctx.fill();
+    ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+    ctx.lineWidth = 1;
+    ctx.stroke();
 
-    // Sharp edge lines
-    for (let i = 0; i < 3; i++) {
-      const t = (i + 1) / 3;
-      const lineAngle = leftToRight
-        ? startAngle + sweptAngle * t
-        : startAngle - sweptAngle * t;
-      ctx.beginPath();
-      ctx.moveTo(
-        cx + Math.cos(lineAngle) * PLAYER_RADIUS,
-        cy + Math.sin(lineAngle) * PLAYER_RADIUS,
-      );
-      ctx.lineTo(
-        cx + Math.cos(lineAngle) * slashRange,
-        cy + Math.sin(lineAngle) * slashRange,
-      );
-      ctx.strokeStyle = `rgba(220, 220, 220, ${alpha})`;
-      ctx.lineWidth = 1;
-      ctx.stroke();
-    }
+    // Motion trail line
+    ctx.beginPath();
+    ctx.moveTo(
+      originX + Math.cos(sideAngle) * PLAYER_RADIUS,
+      originY + Math.sin(sideAngle) * PLAYER_RADIUS,
+    );
+    ctx.lineTo(tipX, tipY);
+    ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * 0.3})`;
+    ctx.lineWidth = 1;
+    ctx.stroke();
 
     ctx.restore();
   },
