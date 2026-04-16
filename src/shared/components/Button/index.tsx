@@ -15,7 +15,7 @@ export const Button: React.FC<Props> = ({
   return (
     <button
       className={cn(
-        'w-full px-3 py-1 rounded-md transition-opacity duration-200',
+        'w-full px-3 py-1 rounded-md transition-opacity duration-200 cursor-pointer',
         {
           primary:
             'bg-primary disabled:opacity-80 hover:opacity-80 disabled:cursor-not-allowed text-white',
