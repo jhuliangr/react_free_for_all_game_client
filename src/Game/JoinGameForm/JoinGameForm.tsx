@@ -34,31 +34,39 @@ export const JoinGameForm = ({ onJoin }: JoinGameFormProps) => {
   return (
     <form
       ref={formRef}
-      className="flex border p-2 mx-auto rounded-md gap-3 bg-secondary"
+      className="flex flex-col border p-2 mx-auto rounded-md gap-7 bg-secondary"
       onSubmit={handleSubmit}
     >
-      {error && (
-        <Toast title="Error" message={error} onDismiss={() => setError(null)} />
-      )}
-      <Button
-        type="button"
-        variant="secondary"
-        onClick={() =>
-          navigate('/', {
-            replace: true,
-          })
-        }
-      >
-        Back
-      </Button>
-      <input
-        name="name"
-        placeholder="Your name"
-        maxLength={MAX_NAME_LENGTH}
-        defaultValue={localStorage.getItem(PLAYER_NAME_KEY) ?? ''}
-        className="px-3 py-1 rounded-md bg-white"
-      />
-      <Button type="submit">Join</Button>
+      <p className="text-3xl text-white/70 text-center font-bold">Join game</p>
+      <div className="flex md:flex-row flex-col md:gap-3 gap-5">
+        {error && (
+          <Toast
+            title="Error"
+            message={error}
+            onDismiss={() => setError(null)}
+          />
+        )}
+        <Button
+          type="button"
+          className="bg-brown"
+          variant="secondary"
+          onClick={() =>
+            navigate('/', {
+              replace: true,
+            })
+          }
+        >
+          Back
+        </Button>
+        <input
+          name="name"
+          placeholder="Your name"
+          maxLength={MAX_NAME_LENGTH}
+          defaultValue={localStorage.getItem(PLAYER_NAME_KEY) ?? ''}
+          className="px-3 py-1 rounded-md bg-white"
+        />
+        <Button type="submit">Join</Button>
+      </div>
     </form>
   );
 };

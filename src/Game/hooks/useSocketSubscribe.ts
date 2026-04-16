@@ -68,9 +68,14 @@ export function useSocketSubscribe() {
     const unsubClose = gameSocket.onClose(() => {
       if (playerNameRef.current) {
         setReconnecting(true);
+        const myId = useGameStore.getState().myPlayerId;
         reset();
         const { selectedCharacter } = useSettingsStore.getState();
-        gameSocket.join(playerNameRef.current, undefined, selectedCharacter);
+        gameSocket.join(
+          playerNameRef.current,
+          myId ?? undefined,
+          selectedCharacter,
+        );
       }
     });
 

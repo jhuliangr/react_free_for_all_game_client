@@ -8,7 +8,7 @@ export const LifeAndXpIndicator: React.FC = () => {
   }
   const me = players[myPlayerId];
   return (
-    <div className="absolute text-left top-5 left-5">
+    <div className="absolute text-left md:top-5 left-5">
       <div
         className={cn('font-bold', {
           'text-lime-400': me.hp > 25,
