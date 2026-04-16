@@ -7,7 +7,7 @@ export const CharacterSelector: React.FC = () => {
   const setSelectedCharacter = useSettingsStore((s) => s.setSelectedCharacter);
 
   return (
-    <div className="flex justify-around gap-3 flex-wrap">
+    <div className="flex md:justify-around justify-center flex-wrap gap-3 ">
       {characters.map((char) => {
         const isSelected = selectedCharacter === char.id;
         const stats = char.stats;
