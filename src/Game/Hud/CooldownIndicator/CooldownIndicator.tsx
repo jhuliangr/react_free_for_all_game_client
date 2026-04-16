@@ -21,7 +21,7 @@ export const CooldownIndicator: React.FC<Props> = ({ cooldownActiveRef }) => {
   if (stats.cooldown_ms === 0) return null;
 
   return (
-    <div className="absolute bottom-12 left-1/2 -translate-x-1/2">
+    <div className="absolute md:bottom-12 mt-2 left-1/2 -translate-x-1/2">
       <div
         className={`w-16 h-2 rounded-full border border-white/30 overflow-hidden transition-opacity ${active ? 'opacity-100' : 'opacity-40'}`}
       >

@@ -37,7 +37,7 @@ export const Hud: React.FC<Props> = ({
       <CooldownIndicator cooldownActiveRef={cooldownActiveRef} />
       <Button
         variant="secondary"
-        className="absolute max-w-fit right-0 bottom-0"
+        className="absolute max-w-fit right-0 md:bottom-0"
         onClick={() => leave()}
       >
         Disconnect

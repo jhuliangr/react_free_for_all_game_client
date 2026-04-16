@@ -15,7 +15,7 @@ export const SkinSelector: React.FC = () => {
     }
   };
   return (
-    <div className="flex gap-3 rounded-xl">
+    <div className="md:flex gap-3 rounded-xl">
       {skins.map((skin) => (
         <img
           key={skin.id}
@@ -24,7 +24,8 @@ export const SkinSelector: React.FC = () => {
           className={cn(
             'w-36 cursor-pointer hover:opacity-80 transition-all duration-200 rounded-lg',
             {
-              'blur-sm cursor-not-allowed': skin.unlockCondition !== null,
+              'blur-sm cursor-not-allowed md:block hidden':
+                skin.unlockCondition !== null,
               'border-2': selectedSkin?.id === skin.id,
             },
           )}

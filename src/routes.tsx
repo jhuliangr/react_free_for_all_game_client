@@ -10,7 +10,7 @@ const NotFound = lazy(() =>
   import('./NotFound').then((m) => ({ default: m.NotFound })),
 );
 const Achievements = lazy(() =>
-  import('./Achievements').then((m) => ({ default: m.Achievements })),
+  import('./MainMenu/Achievements').then((m) => ({ default: m.Achievements })),
 );
 const Settings = lazy(() =>
   import('./MainMenu/Settings').then((m) => ({ default: m.Settings })),
