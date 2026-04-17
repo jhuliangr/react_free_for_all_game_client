@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { createElement, Suspense } from 'react';
 import { describe, it, vi } from 'vitest';
 import { useGetGameSettings } from './useGetGameSettings';
@@ -20,6 +20,8 @@ const wrapper = ({ children }: { children: React.ReactNode }) =>
 
 describe('Hook useGetGameSettings works as expected', () => {
   it('Works', async () => {
-    renderHook(() => useGetGameSettings(), { wrapper });
+    await act(async () => {
+      renderHook(() => useGetGameSettings(), { wrapper });
+    });
   });
 });

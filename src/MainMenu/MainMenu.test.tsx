@@ -1,7 +1,19 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { MainMenu } from './MainMenu';
+
+vi.mock('#shared/utils/api-client', () => ({
+  apiClient: {
+    gameService: {
+      getGameServerInfo: vi.fn().mockResolvedValue({
+        achievements: [],
+        skins: [],
+        weapons: [],
+      }),
+    },
+  },
+}));
 
 describe('MainMenu component works as expected', () => {
   it('works', () => {
@@ -11,26 +23,20 @@ describe('MainMenu component works as expected', () => {
       </MemoryRouter>,
     );
   });
-  it('shows the button for playing', () => {
+  it('shows the button for playing', async () => {
     render(
       <MemoryRouter>
         <MainMenu />
       </MemoryRouter>,
     );
-    setTimeout(() => {
-      expect(screen.getByRole('button')).toBeInTheDocument();
-      expect(screen.getByText(/Play/)).toBeInTheDocument();
-    }, 2000);
+    expect(await screen.findByText(/Play/)).toBeInTheDocument();
   });
-  it('shows the button for settings', () => {
+  it('shows the button for settings', async () => {
     render(
       <MemoryRouter>
         <MainMenu />
       </MemoryRouter>,
     );
-    setTimeout(() => {
-      expect(screen.getByRole('button')).toBeInTheDocument();
-      expect(screen.getByText(/Settings/)).toBeInTheDocument();
-    }, 2000);
+    expect(await screen.findByText(/Settings/)).toBeInTheDocument();
   });
 });
