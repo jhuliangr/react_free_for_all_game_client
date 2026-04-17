@@ -2,6 +2,7 @@ import { gameSocket } from '#shared/services/websocket';
 import { useSettingsStore } from '#shared/stores';
 import { useCallback, useEffect, useRef } from 'react';
 import { characterRegistry } from '../characters';
+import { predictionEngine } from '../engine/predictionEngine';
 
 const MOVE_TICK_MS = 50;
 const DEADZONE = 0.2;
@@ -40,7 +41,7 @@ export function useMobileControls(joined: boolean) {
 
     const angle = Math.atan2(dy, dx);
     lastAttackTimeRef.current = now;
-    gameSocket.attack(angle);
+    gameSocket.attack(angle, gameSocket.nextClientTick());
     attackFlashRef.current = { angle, startTime: now };
 
     if (stats.cooldown_ms > 0) {
@@ -69,9 +70,10 @@ export function useMobileControls(joined: boolean) {
       const normDx = dx > DEADZONE ? 1 : dx < -DEADZONE ? -1 : 0;
       const normDy = dy > DEADZONE ? 1 : dy < -DEADZONE ? -1 : 0;
 
-      if (normDx !== 0 || normDy !== 0) {
-        gameSocket.move(normDx, normDy);
-      }
+      if (normDx === 0 && normDy === 0) return;
+      const tick = gameSocket.nextClientTick();
+      predictionEngine.applyLocalMove(normDx, normDy, tick);
+      gameSocket.move(normDx, normDy, tick);
     }, MOVE_TICK_MS);
 
     return () => {

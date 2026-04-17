@@ -1,5 +1,6 @@
 import { gameSocket } from '#shared/services/websocket';
 import { useEffect, useRef } from 'react';
+import { predictionEngine } from '../engine/predictionEngine';
 
 export function useKeyboardMapping(joined: boolean) {
   const keysRef = useRef<Set<string>>(new Set());
@@ -16,7 +17,10 @@ export function useKeyboardMapping(joined: boolean) {
       if (keys.has('ArrowDown') || keys.has('s')) dy = 1;
       if (keys.has('ArrowLeft') || keys.has('a')) dx = -1;
       if (keys.has('ArrowRight') || keys.has('d')) dx = 1;
-      if (dx !== 0 || dy !== 0) gameSocket.move(dx, dy);
+      if (dx === 0 && dy === 0) return;
+      const tick = gameSocket.nextClientTick();
+      predictionEngine.applyLocalMove(dx, dy, tick);
+      gameSocket.move(dx, dy, tick);
     }, 50);
 
     return () => {

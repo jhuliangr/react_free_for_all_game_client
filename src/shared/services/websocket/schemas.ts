@@ -10,7 +10,6 @@ export const PlayerSchema = z.object({
   level: z.number(),
   xp: z.number(),
   kills: z.number(),
-  deaths: z.number(),
   skin: z.string(),
   weapon: z.string(),
   character: z.string(),
@@ -26,12 +25,17 @@ export const WelcomeMessageSchema = z.object({
   type: z.literal('welcome'),
   playerId: z.string(),
   player: PlayerSchema,
+  serverTick: z.number().optional(),
+  serverTime: z.number().optional(),
 });
 
 export const StateUpdateMessageSchema = z.object({
   type: z.literal('state_update'),
   players: z.array(PlayerDiffSchema),
   removed: z.array(z.string()).default([]),
+  tick: z.number().optional(),
+  serverTime: z.number().optional(),
+  ackTick: z.number().optional(),
 });
 
 export const CombatEventMessageSchema = z.object({

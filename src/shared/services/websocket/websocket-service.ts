@@ -11,6 +11,16 @@ export class GameSocket {
   private reconnectAttempt = 0;
   private readonly maxReconnectAttempts = 5;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  private clientTick = 0;
+
+  nextClientTick() {
+    this.clientTick += 1;
+    return this.clientTick;
+  }
+
+  resetClientTick() {
+    this.clientTick = 0;
+  }
 
   get isReconnecting() {
     return this.reconnecting;
@@ -122,12 +132,16 @@ export class GameSocket {
     return this.send(msg);
   }
 
-  move(dx: number, dy: number) {
-    this.send({ type: 'move', dx, dy });
+  move(dx: number, dy: number, clientTick?: number) {
+    const tick = clientTick ?? this.nextClientTick();
+    this.send({ type: 'move', dx, dy, clientTick: tick });
+    return tick;
   }
 
-  attack(angle: number) {
-    this.send({ type: 'attack', angle });
+  attack(angle: number, clientTick?: number) {
+    const tick = clientTick ?? this.nextClientTick();
+    this.send({ type: 'attack', angle, clientTick: tick });
+    return tick;
   }
 
   equip(slot: 'skin' | 'weapon' | 'character', itemId: string) {

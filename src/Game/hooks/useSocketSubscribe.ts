@@ -8,6 +8,7 @@ import { useGameStore, useSettingsStore } from '#shared/stores';
 import type { Achivement } from '#shared/services/game';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
+import { predictionEngine } from '../engine/predictionEngine';
 
 function checkAchievements(kills: number, level: number): Achivement | null {
   const { achievements, unlockedAchievementIds, unlockAchievement } =
@@ -42,15 +43,19 @@ export function useSocketSubscribe() {
         case 'welcome': {
           const welcome = msg as WelcomeMessage;
           reset();
+          predictionEngine.reset();
+          gameSocket.resetClientTick();
           setMyPlayerId(welcome.playerId);
-          applyStateUpdate([welcome.player], []);
+          applyStateUpdate([welcome.player]);
+          predictionEngine.onWelcome(welcome);
           setJoined(true);
           setReconnecting(false);
           break;
         }
         case 'state_update': {
           const update = msg as StateUpdateMessage;
-          applyStateUpdate(update.players, update.removed ?? []);
+          applyStateUpdate(update.players);
+          predictionEngine.onStateUpdate(update);
           const myId = useGameStore.getState().myPlayerId;
           const me = myId ? useGameStore.getState().players[myId] : null;
           if (me) {
@@ -70,6 +75,7 @@ export function useSocketSubscribe() {
         setReconnecting(true);
         const myId = useGameStore.getState().myPlayerId;
         reset();
+        predictionEngine.reset();
         const { selectedCharacter } = useSettingsStore.getState();
         gameSocket.join(
           playerNameRef.current,

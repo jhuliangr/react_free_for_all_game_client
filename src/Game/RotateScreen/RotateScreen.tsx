@@ -4,7 +4,7 @@ interface Props {
   isMobile: boolean;
 }
 
-const RotateScreen: React.FC<Props> = ({ isMobile }) => {
+export const RotateScreen: React.FC<Props> = ({ isMobile }) => {
   const isPortrait = useIsPortrait();
   if (isMobile && isPortrait) {
     return (
@@ -33,4 +33,3 @@ const RotateScreen: React.FC<Props> = ({ isMobile }) => {
   }
   return null;
 };
-export default RotateScreen;
