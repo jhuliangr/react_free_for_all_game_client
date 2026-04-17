@@ -25,7 +25,7 @@ function lerpAngle(current: number, target: number, t: number): number {
 // server-confirmed position. Half-life ~2.4 frames (~40ms at 60Hz): near
 // players (50ms updates) barely lag; mid-range players (~150ms updates)
 // transition continuously instead of teleporting every third tick.
-const REMOTE_SMOOTH = 10;
+const REMOTE_SMOOTH = 0.25;
 // When a remote player jumps more than this in a single frame, the cause is
 // almost certainly a respawn / re-entry after the 1s grace period, not real
 // motion. Snap to the new position to avoid a long visible glide across the
