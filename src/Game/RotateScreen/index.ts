@@ -1,1 +1,1 @@
-export {} from './RotateScreen';
+export { RotateScreen } from './RotateScreen';

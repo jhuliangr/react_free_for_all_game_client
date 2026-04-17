@@ -16,6 +16,7 @@ import {
   useSocketSubscribe,
   useSoundEffects,
 } from './hooks';
+import { RotateScreen } from './RotateScreen/RotateScreen';
 
 export function Game() {
   const {
@@ -74,48 +75,51 @@ export function Game() {
   if (!joined) return <JoinGameForm onJoin={join} />;
 
   return (
-    <div
-      className="relative mx-auto"
-      style={
-        isMobile
-          ? { width: '100vw', height: '100dvh', overflow: 'hidden' }
-          : { maxWidth: '800px', maxHeight: '600px' }
-      }
-    >
-      <Hud
-        leave={leave}
-        cooldownActiveRef={cooldownActiveRef}
-        lastUnlockedAchievement={lastUnlockedAchievement}
-        onDismissAchievement={clearAchievementNotification}
-      />
-      <canvas
-        width={800}
-        height={600}
+    <>
+      <RotateScreen isMobile={isMobile} />
+      <div
+        className="relative mx-auto"
         style={
           isMobile
-            ? {
-                border: 'outset black',
-                height: '100%',
-                objectFit: 'contain',
-                touchAction: 'none',
-              }
-            : { border: 'outset black' }
+            ? { width: '100vw', height: '100dvh', overflow: 'hidden' }
+            : { maxWidth: '800px', maxHeight: '600px' }
         }
-        onClick={isMobile ? undefined : desktopAttack.handleCanvasClick}
-        ref={canvasRef}
-        onContextMenu={(e) => e.preventDefault()}
-        className={`mx-auto rounded ${isMobile ? '' : 'cursor-crosshair'}`}
-      />
-      {isMobile && (
-        <>
-          <Joystick side="left" onMove={mobileControls.onMoveJoystick} />
-          <Joystick
-            side="right"
-            onMove={mobileControls.onAttackJoystick}
-            onEnd={mobileControls.onAttackEnd}
-          />
-        </>
-      )}
-    </div>
+      >
+        <Hud
+          leave={leave}
+          cooldownActiveRef={cooldownActiveRef}
+          lastUnlockedAchievement={lastUnlockedAchievement}
+          onDismissAchievement={clearAchievementNotification}
+        />
+        <canvas
+          width={800}
+          height={600}
+          style={
+            isMobile
+              ? {
+                  border: 'outset black',
+                  height: '100%',
+                  objectFit: 'contain',
+                  touchAction: 'none',
+                }
+              : { border: 'outset black' }
+          }
+          onClick={isMobile ? undefined : desktopAttack.handleCanvasClick}
+          ref={canvasRef}
+          onContextMenu={(e) => e.preventDefault()}
+          className={`mx-auto rounded ${isMobile ? '' : 'cursor-crosshair'}`}
+        />
+        {isMobile && (
+          <>
+            <Joystick side="left" onMove={mobileControls.onMoveJoystick} />
+            <Joystick
+              side="right"
+              onMove={mobileControls.onAttackJoystick}
+              onEnd={mobileControls.onAttackEnd}
+            />
+          </>
+        )}
+      </div>
+    </>
   );
 }
