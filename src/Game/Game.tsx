@@ -46,7 +46,10 @@ export function Game() {
     isMobile ? undefined : playAttackSound,
   );
 
-  const mobileControls = useMobileControls(joined && isMobile);
+  const mobileControls = useMobileControls(
+    joined && isMobile,
+    isMobile ? playAttackSound : undefined,
+  );
 
   const attackFlashRef = isMobile
     ? mobileControls.attackFlashRef

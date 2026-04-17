@@ -7,7 +7,10 @@ import { predictionEngine } from '../engine/predictionEngine';
 const MOVE_TICK_MS = 50;
 const DEADZONE = 0.2;
 
-export function useMobileControls(joined: boolean) {
+export function useMobileControls(
+  joined: boolean,
+  onAttack?: (characterId: string) => void,
+) {
   const moveDx = useRef(0);
   const moveDy = useRef(0);
   const tickRef = useRef<number | null>(null);
@@ -23,38 +26,42 @@ export function useMobileControls(joined: boolean) {
     moveDy.current = dy;
   }, []);
 
-  const onAttackJoystick = useCallback((dx: number, dy: number) => {
-    const magnitude = Math.sqrt(dx * dx + dy * dy);
-    if (magnitude < DEADZONE) return;
+  const onAttackJoystick = useCallback(
+    (dx: number, dy: number) => {
+      const magnitude = Math.sqrt(dx * dx + dy * dy);
+      if (magnitude < DEADZONE) return;
 
-    const stats = useSettingsStore.getState().getSelectedCharacterStats();
-    const selectedChar = useSettingsStore.getState().selectedCharacter;
-    const charDef = characterRegistry.get(selectedChar);
-    const now = performance.now();
+      const stats = useSettingsStore.getState().getSelectedCharacterStats();
+      const selectedChar = useSettingsStore.getState().selectedCharacter;
+      const charDef = characterRegistry.get(selectedChar);
+      const now = performance.now();
 
-    if (
-      stats.cooldown_ms > 0 &&
-      now - lastAttackTimeRef.current < stats.cooldown_ms
-    ) {
-      return;
-    }
+      if (
+        stats.cooldown_ms > 0 &&
+        now - lastAttackTimeRef.current < stats.cooldown_ms
+      ) {
+        return;
+      }
 
-    const angle = Math.atan2(dy, dx);
-    lastAttackTimeRef.current = now;
-    gameSocket.attack(angle, gameSocket.nextClientTick());
-    attackFlashRef.current = { angle, startTime: now };
+      const angle = Math.atan2(dy, dx);
+      lastAttackTimeRef.current = now;
+      gameSocket.attack(angle, gameSocket.nextClientTick());
+      onAttack?.(selectedChar);
+      attackFlashRef.current = { angle, startTime: now };
 
-    if (stats.cooldown_ms > 0) {
-      cooldownActiveRef.current = true;
+      if (stats.cooldown_ms > 0) {
+        cooldownActiveRef.current = true;
+        setTimeout(() => {
+          cooldownActiveRef.current = false;
+        }, stats.cooldown_ms);
+      }
+
       setTimeout(() => {
-        cooldownActiveRef.current = false;
-      }, stats.cooldown_ms);
-    }
-
-    setTimeout(() => {
-      attackFlashRef.current = null;
-    }, charDef.attackDurationMs + 80);
-  }, []);
+        attackFlashRef.current = null;
+      }, charDef.attackDurationMs + 80);
+    },
+    [onAttack],
+  );
 
   const onAttackEnd = useCallback(() => {}, []);
 
