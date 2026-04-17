@@ -3,8 +3,9 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { useRef } from 'react';
 import { useGameStore } from '#shared/stores';
 import { Hud } from './Hud';
+import type { Player } from '#shared/services/websocket';
 
-const basePlayer = {
+const basePlayer: Player = {
   id: 'me',
   name: 'Me',
   x: 1.2345,
@@ -14,7 +15,6 @@ const basePlayer = {
   level: 2,
   xp: 50,
   kills: 1,
-  deaths: 0,
   skin: 'default',
   weapon: 'sword',
   character: 'knight',

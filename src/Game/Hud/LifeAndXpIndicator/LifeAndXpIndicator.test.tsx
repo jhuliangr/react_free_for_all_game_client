@@ -2,8 +2,9 @@ import { describe, expect, it, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { useGameStore } from '#shared/stores';
 import { LifeAndXpIndicator } from './LifeAndXpIndicator';
+import type { Player } from '#shared/services/websocket';
 
-const basePlayer = {
+const basePlayer: Player = {
   id: 'me',
   name: 'Me',
   x: 0,
@@ -13,7 +14,6 @@ const basePlayer = {
   level: 3,
   xp: 120,
   kills: 4,
-  deaths: 2,
   skin: 'default',
   weapon: 'sword',
   character: 'knight',
@@ -39,9 +39,9 @@ describe('LifeAndXpIndicator component works as expected', () => {
     expect(screen.getByText(/HP: 75 \/ 100/)).toBeInTheDocument();
   });
 
-  it('shows the player kill/death stats', () => {
+  it('shows the player kill stats', () => {
     useGameStore.setState({ myPlayerId: 'me', players: { me: basePlayer } });
     render(<LifeAndXpIndicator />);
-    expect(screen.getByText(/K: 4 \/ D: 2/)).toBeInTheDocument();
+    expect(screen.getByText(/K: 4/)).toBeInTheDocument();
   });
 });

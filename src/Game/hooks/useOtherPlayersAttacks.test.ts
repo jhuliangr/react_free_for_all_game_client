@@ -15,8 +15,9 @@ vi.mock('#shared/services/websocket', () => ({
 
 import { useOtherPlayersAttacks } from './useOtherPlayersAttacks';
 import { useGameStore } from '#shared/stores';
+import type { Player } from '#shared/services/websocket';
 
-const basePlayer = {
+const basePlayer: Player = {
   id: 'p1',
   name: 'One',
   x: 0,
@@ -26,7 +27,6 @@ const basePlayer = {
   level: 1,
   xp: 0,
   kills: 0,
-  deaths: 0,
   skin: 'default',
   weapon: 'sword',
   character: 'knight',

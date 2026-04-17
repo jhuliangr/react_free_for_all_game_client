@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { LifeAndXpIndicator } from '.';
 import type { GameStateStore } from '#shared/stores';
+import type { Player } from '#shared/services/websocket';
 
 const meta: Meta<typeof LifeAndXpIndicator> = {
   title: 'Hud/LifeAndXpIndicator',
@@ -17,16 +18,19 @@ export default meta;
 
 type Story = StoryObj<typeof LifeAndXpIndicator>;
 
-const basePlayer = {
+const basePlayer: Player = {
   id: 'player-1',
   name: 'Hero',
   x: 0,
   y: 0,
   kills: 0,
-  deaths: 0,
   skin: 'default',
   weapon: 'sword',
   character: 'warrior',
+  hp: 100,
+  level: 0,
+  max_hp: 100,
+  xp: 0,
 };
 
 export const HealthyFullXp: Story = {

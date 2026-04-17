@@ -95,9 +95,9 @@ export const Joystick: React.FC<Props> = ({ onMove, onEnd, side }) => {
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
       onTouchCancel={onTouchEnd}
-      className="absolute bottom-6 z-50 select-none"
+      className="absolute bottom-12 z-50 select-none"
       style={{
-        [side === 'left' ? 'left' : 'right']: '24px',
+        [side === 'left' ? 'left' : 'right']: '50px',
         width: BASE_SIZE,
         height: BASE_SIZE,
         borderRadius: '50%',

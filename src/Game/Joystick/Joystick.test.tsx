@@ -16,7 +16,7 @@ describe('Joystick component works as expected', () => {
 
   it('positions the base on the left for side="left"', () => {
     const { container } = render(<Joystick side="left" onMove={() => {}} />);
-    expect(getBase(container)).toHaveStyle({ left: '24px' });
+    expect(getBase(container)).toHaveStyle({ left: '50px' });
   });
 
   it('calls onMove(0, 0) and onEnd when a touch ends', () => {

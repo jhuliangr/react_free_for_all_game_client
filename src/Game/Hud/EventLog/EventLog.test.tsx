@@ -2,8 +2,9 @@ import { describe, expect, it, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { useGameStore } from '#shared/stores';
 import { EventLog } from './EventLog';
+import type { Player } from '#shared/services/websocket';
 
-const basePlayer = {
+const basePlayer: Player = {
   id: 'me',
   name: 'Me',
   x: 0,
@@ -13,7 +14,6 @@ const basePlayer = {
   level: 1,
   xp: 0,
   kills: 0,
-  deaths: 0,
   skin: 'default',
   weapon: 'sword',
   character: 'knight',

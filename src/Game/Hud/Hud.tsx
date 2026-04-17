@@ -1,6 +1,7 @@
 import { Button } from '#shared/components';
 import type { Achivement } from '#shared/services/game';
 import { useGameStore } from '#shared/stores';
+import { cn } from '#shared/utils';
 import { AchievementNotification } from './AchievementNotification';
 import { CooldownIndicator } from './CooldownIndicator';
 import { EventLog } from './EventLog';
@@ -11,6 +12,7 @@ type Props = {
   cooldownActiveRef: React.RefObject<boolean>;
   lastUnlockedAchievement: Achivement | null;
   onDismissAchievement: () => void;
+  isMobile: boolean;
 };
 
 export const Hud: React.FC<Props> = ({
@@ -18,6 +20,7 @@ export const Hud: React.FC<Props> = ({
   cooldownActiveRef,
   lastUnlockedAchievement,
   onDismissAchievement,
+  isMobile,
 }) => {
   const { myPlayerId, players } = useGameStore();
   const me = myPlayerId ? players[myPlayerId] : null;
@@ -37,7 +40,10 @@ export const Hud: React.FC<Props> = ({
       <CooldownIndicator cooldownActiveRef={cooldownActiveRef} />
       <Button
         variant="secondary"
-        className="absolute max-w-fit right-0 md:bottom-0"
+        className={cn('absolute max-w-fit', {
+          'left-0 top-24': isMobile,
+          'right-0 bottom-0': !isMobile,
+        })}
         onClick={() => leave()}
       >
         Disconnect

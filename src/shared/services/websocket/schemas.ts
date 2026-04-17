@@ -10,7 +10,6 @@ export const PlayerSchema = z.object({
   level: z.number(),
   xp: z.number(),
   kills: z.number(),
-  deaths: z.number(),
   skin: z.string(),
   weapon: z.string(),
   character: z.string(),

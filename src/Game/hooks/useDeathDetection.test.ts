@@ -13,7 +13,6 @@ const basePlayer: Player = {
   level: 1,
   xp: 0,
   kills: 0,
-  deaths: 0,
   skin: 'default',
   weapon: 'sword',
   character: 'knight',

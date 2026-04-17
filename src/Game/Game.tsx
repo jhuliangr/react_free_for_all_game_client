@@ -90,6 +90,7 @@ export function Game() {
           cooldownActiveRef={cooldownActiveRef}
           lastUnlockedAchievement={lastUnlockedAchievement}
           onDismissAchievement={clearAchievementNotification}
+          isMobile={isMobile}
         />
         <canvas
           width={800}
