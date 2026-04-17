@@ -4,7 +4,7 @@ import { renderHook } from '@testing-library/react';
 const onMessage = vi.fn(() => () => {});
 vi.mock('#shared/services/websocket', () => ({
   gameSocket: {
-    onMessage: (h: unknown) => onMessage(h),
+    onMessage: () => onMessage(),
   },
 }));
 

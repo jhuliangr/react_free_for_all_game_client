@@ -15,9 +15,9 @@ vi.mock('#shared/services/websocket', () => ({
     connect: () => connect(),
     disconnect: () => disconnect(),
     join: (...args: unknown[]) => join(...args),
-    onMessage: (h: unknown) => onMessage(h),
-    onClose: (h: unknown) => onClose(h),
-    onReconnectFail: (h: unknown) => onReconnectFail(h),
+    onMessage: () => onMessage(),
+    onClose: () => onClose(),
+    onReconnectFail: () => onReconnectFail(),
   },
 }));
 

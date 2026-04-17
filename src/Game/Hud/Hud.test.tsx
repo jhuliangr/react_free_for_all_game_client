@@ -33,6 +33,7 @@ function Harness(props: {
       cooldownActiveRef={ref}
       lastUnlockedAchievement={props.lastUnlockedAchievement ?? null}
       onDismissAchievement={() => {}}
+      isMobile={false}
     />
   );
 }
