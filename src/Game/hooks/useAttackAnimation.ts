@@ -33,7 +33,7 @@ export function useAttackAnimation(onAttack?: (characterId: string) => void) {
     );
 
     lastAttackTimeRef.current = now;
-    gameSocket.attack(angle);
+    gameSocket.attack(angle, gameSocket.nextClientTick());
     onAttack?.(selectedChar);
     attackFlashRef.current = { angle, startTime: now };
 

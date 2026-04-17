@@ -2,9 +2,11 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 
 const move = vi.fn();
+let tickCounter = 0;
 vi.mock('#shared/services/websocket', () => ({
   gameSocket: {
     move: (...args: unknown[]) => move(...args),
+    nextClientTick: () => ++tickCounter,
   },
 }));
 
@@ -14,6 +16,7 @@ describe('useKeyboardMapping hook works as expected', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     move.mockClear();
+    tickCounter = 0;
   });
 
   afterEach(() => {
@@ -35,7 +38,7 @@ describe('useKeyboardMapping hook works as expected', () => {
     act(() => {
       vi.advanceTimersByTime(60);
     });
-    expect(move).toHaveBeenCalledWith(0, -1);
+    expect(move).toHaveBeenCalledWith(0, -1, expect.any(Number));
   });
 
   it('stops sending moves once the key is released', () => {

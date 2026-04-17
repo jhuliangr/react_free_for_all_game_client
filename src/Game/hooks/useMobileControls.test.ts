@@ -3,10 +3,12 @@ import { renderHook, act } from '@testing-library/react';
 
 const move = vi.fn();
 const attack = vi.fn();
+let tickCounter = 0;
 vi.mock('#shared/services/websocket', () => ({
   gameSocket: {
     move: (...args: unknown[]) => move(...args),
     attack: (...args: unknown[]) => attack(...args),
+    nextClientTick: () => ++tickCounter,
   },
 }));
 
@@ -17,6 +19,7 @@ describe('useMobileControls hook works as expected', () => {
     vi.useFakeTimers();
     move.mockClear();
     attack.mockClear();
+    tickCounter = 0;
   });
 
   afterEach(() => {
@@ -37,7 +40,7 @@ describe('useMobileControls hook works as expected', () => {
       result.current.onMoveJoystick(1, 0);
       vi.advanceTimersByTime(60);
     });
-    expect(move).toHaveBeenCalledWith(1, 0);
+    expect(move).toHaveBeenCalledWith(1, 0, expect.any(Number));
   });
 
   it('ignores tiny joystick movements inside the deadzone', () => {

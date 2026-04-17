@@ -5,6 +5,7 @@ const attack = vi.fn();
 vi.mock('#shared/services/websocket', () => ({
   gameSocket: {
     attack: (...args: unknown[]) => attack(...args),
+    nextClientTick: () => 1,
   },
 }));
 

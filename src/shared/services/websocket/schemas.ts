@@ -26,12 +26,17 @@ export const WelcomeMessageSchema = z.object({
   type: z.literal('welcome'),
   playerId: z.string(),
   player: PlayerSchema,
+  serverTick: z.number().optional(),
+  serverTime: z.number().optional(),
 });
 
 export const StateUpdateMessageSchema = z.object({
   type: z.literal('state_update'),
   players: z.array(PlayerDiffSchema),
   removed: z.array(z.string()).default([]),
+  tick: z.number().optional(),
+  serverTime: z.number().optional(),
+  ackTick: z.number().optional(),
 });
 
 export const CombatEventMessageSchema = z.object({
