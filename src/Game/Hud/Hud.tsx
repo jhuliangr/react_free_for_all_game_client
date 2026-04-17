@@ -41,7 +41,7 @@ export const Hud: React.FC<Props> = ({
       <Button
         variant="secondary"
         className={cn('absolute max-w-fit', {
-          'left-0 top-24': isMobile,
+          'left-5 top-24': isMobile,
           'right-0 bottom-0': !isMobile,
         })}
         onClick={() => leave()}
