@@ -13,6 +13,7 @@ import {
   renderMapBounds,
   renderPickup,
   renderPlayer,
+  renderVignette,
 } from '../utils';
 
 function lerpAngle(current: number, target: number, t: number): number {
@@ -254,6 +255,8 @@ export function useCanvasRenderer(
               );
             },
           );
+
+          renderVignette(ctx);
         }
       }
 

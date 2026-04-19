@@ -12,3 +12,4 @@ export { renderGrid } from './renderGrid';
 export { renderMapBounds } from './renderMapBounds';
 export { renderPickup } from './renderPickup';
 export { renderPlayer } from './renderPlayer';
+export { renderVignette } from './renderVignette';
