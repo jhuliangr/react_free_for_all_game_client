@@ -2,15 +2,23 @@ import { useCallback, useRef } from 'react';
 
 type Props = {
   onMove: (dx: number, dy: number) => void;
+  onStart?: () => void;
   onEnd?: () => void;
   side: 'left' | 'right';
+  deadzone?: number;
 };
 
 const BASE_SIZE = 120;
 const KNOB_SIZE = 50;
 const MAX_DISTANCE = (BASE_SIZE - KNOB_SIZE) / 2;
 
-export const Joystick: React.FC<Props> = ({ onMove, onEnd, side }) => {
+export const Joystick: React.FC<Props> = ({
+  onMove,
+  onStart,
+  onEnd,
+  side,
+  deadzone = 0,
+}) => {
   const baseRef = useRef<HTMLDivElement>(null);
   const knobRef = useRef<HTMLDivElement>(null);
   const activeTouch = useRef<number | null>(null);
@@ -34,21 +42,29 @@ export const Joystick: React.FC<Props> = ({ onMove, onEnd, side }) => {
         dy = (dy / dist) * MAX_DISTANCE;
       }
 
-      knob.style.transform = `translate(${dx}px, ${dy}px)`;
-
       const normalizedDx = dx / MAX_DISTANCE;
       const normalizedDy = dy / MAX_DISTANCE;
+      const mag = Math.sqrt(
+        normalizedDx * normalizedDx + normalizedDy * normalizedDy,
+      );
+
+      if (mag < deadzone) {
+        knob.style.transform = 'translate(0px, 0px)';
+      } else {
+        knob.style.transform = `translate(${dx}px, ${dy}px)`;
+      }
+
       onMove(normalizedDx, normalizedDy);
     },
-    [onMove],
+    [onMove, deadzone],
   );
 
   const handleEnd = useCallback(() => {
     const knob = knobRef.current;
     if (knob) knob.style.transform = 'translate(0px, 0px)';
     activeTouch.current = null;
-    onMove(0, 0);
     onEnd?.();
+    onMove(0, 0);
   }, [onMove, onEnd]);
 
   const onTouchStart = useCallback(
@@ -57,9 +73,10 @@ export const Joystick: React.FC<Props> = ({ onMove, onEnd, side }) => {
       if (activeTouch.current !== null) return;
       const touch = e.changedTouches[0];
       activeTouch.current = touch.identifier;
+      onStart?.();
       handleMove(touch.clientX, touch.clientY);
     },
-    [handleMove],
+    [handleMove, onStart],
   );
 
   const onTouchMove = useCallback(

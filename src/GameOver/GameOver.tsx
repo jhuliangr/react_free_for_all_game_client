@@ -1,10 +1,20 @@
 import { Button } from '#shared/components';
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
+
+type GameOverState = { killerName?: string | null } | null;
 
 export const GameOver: React.FC = () => {
+  const location = useLocation();
+  const killerName = (location.state as GameOverState)?.killerName ?? null;
+
   return (
     <div className="flex flex-col gap-5">
       <h2 className="font-bold text-dark text-6xl">Game Over</h2>
+      {killerName && (
+        <p className="text-dark text-xl text-center py-2">
+          You were defeated by: <span className="font-bold">{killerName}</span>
+        </p>
+      )}
       <Link to="/play">
         <Button>Play Again</Button>
       </Link>

@@ -108,6 +108,7 @@ describe('PredictionEngine — server reconciliation', () => {
       type: 'state_update',
       players: [{ id: 'me', x: 10, y: 0 }],
       removed: [],
+      pickups: [],
       tick: 5,
       serverTime: 1500,
       ackTick: 1,
@@ -127,6 +128,7 @@ describe('PredictionEngine — server reconciliation', () => {
       type: 'state_update',
       players: [{ id: 'me', x: 10, y: 0 }],
       removed: [],
+      pickups: [],
       tick: 2,
       serverTime: 1100,
       ackTick: 1,
@@ -146,6 +148,7 @@ describe('PredictionEngine — remote players are not tracked', () => {
       type: 'state_update',
       players: [{ id: 'other', x: 123, y: 456 }],
       removed: [],
+      pickups: [],
       tick: 1,
       serverTime: 1000,
     });

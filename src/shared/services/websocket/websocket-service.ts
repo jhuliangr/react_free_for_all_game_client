@@ -159,6 +159,9 @@ export class GameSocket {
     const ws = this.ws;
     this.ws = null;
     if (!ws) return;
+    ws.onmessage = null;
+    ws.onerror = null;
+    ws.onclose = null;
     if (ws.readyState !== WebSocket.CONNECTING) {
       ws.close();
     } else {

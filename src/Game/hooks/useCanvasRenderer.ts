@@ -11,7 +11,9 @@ import {
   renderAttack,
   renderBackground,
   renderMapBounds,
+  renderPickup,
   renderPlayer,
+  renderVignette,
 } from '../utils';
 
 function lerpAngle(current: number, target: number, t: number): number {
@@ -32,6 +34,13 @@ const REMOTE_SMOOTH = 0.25;
 // map. Upper bound on legitimate per-frame motion is ~10 units after a 150ms
 // throttle gap.
 const REMOTE_SNAP_THRESHOLD = 80;
+// Minimum per-frame position delta (world units) required to update a
+// remote player's facing target. Below this, the delta is dominated by
+// interpolation noise and reconciliation corrections; feeding it to
+// atan2 causes the sprite to flip 180° momentarily (the visible "blink"
+// in the facing direction). At our scale a real walking step lands well
+// above 1u per frame, so this rejects jitter without losing real motion.
+const FACING_MIN_DELTA = 1.0;
 
 export function useCanvasRenderer(
   canvasRef: RefObject<HTMLCanvasElement | null>,
@@ -62,7 +71,7 @@ export function useCanvasRenderer(
       }
 
       if (ctx) {
-        const { players, myPlayerId, lastCombatEvent } =
+        const { players, myPlayerId, lastCombatEvent, pickups } =
           useGameStore.getState();
         const meAuthoritative = myPlayerId ? players[myPlayerId] : null;
 
@@ -135,14 +144,29 @@ export function useCanvasRenderer(
           renderBackground(ctx, offsetX, offsetY, bgImageRef.current);
           renderMapBounds(ctx, offsetX, offsetY);
 
-          // Update target facing angles from position deltas
+          const pulseNow = performance.now();
+          pickups.forEach((pickup) => {
+            renderPickup(ctx!, pickup, offsetX, offsetY, pulseNow);
+          });
+
+          // Update target facing angles. For the local player we use the
+          // last input direction tracked by the prediction engine — the
+          // rendered position delta flips 180° under reconciliation
+          // corrections and causes a visible "blink" in the sprite angle.
+          // For remote players we use the position delta but reject tiny
+          // magnitudes (interpolation noise) via FACING_MIN_DELTA.
+          const localInputAngle = predictionEngine.getLastInputAngle();
           Object.values(players).forEach((p) => {
             const pos = renderedPositions[p.id];
             const prev = prevPositions.current[p.id];
-            if (prev) {
+            if (p.id === myPlayerId) {
+              if (localInputAngle !== null) {
+                targetFacingAngles.current[p.id] = localInputAngle;
+              }
+            } else if (prev) {
               const ddx = pos.x - prev.x;
               const ddy = pos.y - prev.y;
-              if (ddx !== 0 || ddy !== 0) {
+              if (Math.hypot(ddx, ddy) > FACING_MIN_DELTA) {
                 targetFacingAngles.current[p.id] = Math.atan2(ddy, ddx);
               }
             }
@@ -231,6 +255,8 @@ export function useCanvasRenderer(
               );
             },
           );
+
+          renderVignette(ctx);
         }
       }
 

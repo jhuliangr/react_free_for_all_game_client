@@ -1,6 +1,7 @@
 import {
   gameSocket,
   type CombatEventMessage,
+  type KickedMessage,
   type StateUpdateMessage,
   type WelcomeMessage,
 } from '#shared/services/websocket';
@@ -9,6 +10,32 @@ import type { Achivement } from '#shared/services/game';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { predictionEngine } from '../engine/predictionEngine';
+
+const PLAYER_ID_KEY = 'multiplayer.playerId';
+
+function loadStoredPlayerId(): string | undefined {
+  try {
+    return localStorage.getItem(PLAYER_ID_KEY) ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function storePlayerId(id: string) {
+  try {
+    localStorage.setItem(PLAYER_ID_KEY, id);
+  } catch {
+    /* storage unavailable — best effort */
+  }
+}
+
+function clearStoredPlayerId() {
+  try {
+    localStorage.removeItem(PLAYER_ID_KEY);
+  } catch {
+    /* storage unavailable — best effort */
+  }
+}
 
 function checkAchievements(kills: number, level: number): Achivement | null {
   const { achievements, unlockedAchievementIds, unlockAchievement } =
@@ -30,10 +57,11 @@ export function useSocketSubscribe() {
   const [reconnecting, setReconnecting] = useState(false);
   const [lastUnlockedAchievement, setLastUnlockedAchievement] =
     useState<Achivement | null>(null);
-  const { setMyPlayerId, applyStateUpdate, setCombatEvent, reset } =
+  const { setMyPlayerId, applyStateUpdate, setCombatEvent, setPickups, reset } =
     useGameStore();
   const navigate = useNavigate();
   const playerNameRef = useRef<string | null>(null);
+  const lastKillerNameRef = useRef<string | null>(null);
 
   useEffect(() => {
     gameSocket.connect();
@@ -46,6 +74,7 @@ export function useSocketSubscribe() {
           predictionEngine.reset();
           gameSocket.resetClientTick();
           setMyPlayerId(welcome.playerId);
+          storePlayerId(welcome.playerId);
           applyStateUpdate([welcome.player]);
           predictionEngine.onWelcome(welcome);
           setJoined(true);
@@ -55,6 +84,7 @@ export function useSocketSubscribe() {
         case 'state_update': {
           const update = msg as StateUpdateMessage;
           applyStateUpdate(update.players);
+          setPickups(update.pickups);
           predictionEngine.onStateUpdate(update);
           const myId = useGameStore.getState().myPlayerId;
           const me = myId ? useGameStore.getState().players[myId] : null;
@@ -64,16 +94,48 @@ export function useSocketSubscribe() {
           }
           break;
         }
-        case 'combat_event':
-          setCombatEvent(msg as CombatEventMessage);
+        case 'combat_event': {
+          const event = msg as CombatEventMessage;
+          setCombatEvent(event);
+          const myId = useGameStore.getState().myPlayerId;
+          if (myId && event.defenderId === myId) {
+            if (event.attackerId === 'dot') {
+              lastKillerNameRef.current = 'damage effect';
+            } else {
+              const attacker =
+                useGameStore.getState().players[event.attackerId];
+              lastKillerNameRef.current = attacker?.name ?? 'a player';
+            }
+          }
           break;
+        }
+        case 'kicked': {
+          const kicked = msg as KickedMessage;
+          console.warn(
+            'Session taken over by another connection:',
+            kicked.reason,
+          );
+          playerNameRef.current = null;
+          clearStoredPlayerId();
+          reset();
+          predictionEngine.reset();
+          setJoined(false);
+          setReconnecting(false);
+          gameSocket.disconnect();
+          gameSocket.connect();
+          navigate('/play', {
+            replace: true,
+            state: { kicked: kicked.reason },
+          });
+          break;
+        }
       }
     });
 
     const unsubClose = gameSocket.onClose(() => {
       if (playerNameRef.current) {
         setReconnecting(true);
-        const myId = useGameStore.getState().myPlayerId;
+        const myId = useGameStore.getState().myPlayerId ?? loadStoredPlayerId();
         reset();
         predictionEngine.reset();
         const { selectedCharacter } = useSettingsStore.getState();
@@ -98,16 +160,25 @@ export function useSocketSubscribe() {
       unsubReconnectFail();
       gameSocket.disconnect();
     };
-  }, [setCombatEvent, setMyPlayerId, applyStateUpdate, reset, navigate]);
+  }, [
+    setCombatEvent,
+    setMyPlayerId,
+    applyStateUpdate,
+    setPickups,
+    reset,
+    navigate,
+  ]);
 
   const join = useCallback((name: string) => {
     playerNameRef.current = name;
     const { selectedCharacter } = useSettingsStore.getState();
-    gameSocket.join(name, undefined, selectedCharacter);
+    const storedId = loadStoredPlayerId();
+    gameSocket.join(name, storedId, selectedCharacter);
   }, []);
 
   const leave = useCallback(() => {
     playerNameRef.current = null;
+    clearStoredPlayerId();
     gameSocket.disconnect();
     gameSocket.connect();
     reset();
@@ -118,13 +189,17 @@ export function useSocketSubscribe() {
   }, [reset, navigate]);
 
   const lost = useCallback(() => {
+    const killerName = lastKillerNameRef.current;
+    lastKillerNameRef.current = null;
     playerNameRef.current = null;
+    clearStoredPlayerId();
     gameSocket.disconnect();
     gameSocket.connect();
     reset();
     setJoined(false);
     navigate('/game-over', {
       replace: true,
+      state: { killerName },
     });
   }, [reset, navigate]);
 

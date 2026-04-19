@@ -21,6 +21,13 @@ export const PlayerDiffSchema = PlayerSchema.partial().extend({
 });
 export type PlayerDiff = z.infer<typeof PlayerDiffSchema>;
 
+export const PickupSchema = z.object({
+  id: z.string(),
+  x: z.number(),
+  y: z.number(),
+});
+export type Pickup = z.infer<typeof PickupSchema>;
+
 export const WelcomeMessageSchema = z.object({
   type: z.literal('welcome'),
   playerId: z.string(),
@@ -33,6 +40,7 @@ export const StateUpdateMessageSchema = z.object({
   type: z.literal('state_update'),
   players: z.array(PlayerDiffSchema),
   removed: z.array(z.string()).default([]),
+  pickups: z.array(PickupSchema).default([]),
   tick: z.number().optional(),
   serverTime: z.number().optional(),
   ackTick: z.number().optional(),
@@ -50,15 +58,22 @@ export const ErrorMessageSchema = z.object({
   reason: z.string(),
 });
 
+export const KickedMessageSchema = z.object({
+  type: z.literal('kicked'),
+  reason: z.string(),
+});
+
 export type WelcomeMessage = z.infer<typeof WelcomeMessageSchema>;
 export type StateUpdateMessage = z.infer<typeof StateUpdateMessageSchema>;
 export type CombatEventMessage = z.infer<typeof CombatEventMessageSchema>;
 export type ErrorMessage = z.infer<typeof ErrorMessageSchema>;
+export type KickedMessage = z.infer<typeof KickedMessageSchema>;
 
 export type ServerMessage =
   | WelcomeMessage
   | StateUpdateMessage
   | CombatEventMessage
-  | ErrorMessage;
+  | ErrorMessage
+  | KickedMessage;
 
 export type MessageHandler = (msg: ServerMessage) => void;
