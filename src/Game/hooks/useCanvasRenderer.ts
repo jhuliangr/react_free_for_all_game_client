@@ -11,6 +11,7 @@ import {
   renderAttack,
   renderBackground,
   renderMapBounds,
+  renderPickup,
   renderPlayer,
 } from '../utils';
 
@@ -69,7 +70,7 @@ export function useCanvasRenderer(
       }
 
       if (ctx) {
-        const { players, myPlayerId, lastCombatEvent } =
+        const { players, myPlayerId, lastCombatEvent, pickups } =
           useGameStore.getState();
         const meAuthoritative = myPlayerId ? players[myPlayerId] : null;
 
@@ -141,6 +142,11 @@ export function useCanvasRenderer(
 
           renderBackground(ctx, offsetX, offsetY, bgImageRef.current);
           renderMapBounds(ctx, offsetX, offsetY);
+
+          const pulseNow = performance.now();
+          pickups.forEach((pickup) => {
+            renderPickup(ctx!, pickup, offsetX, offsetY, pulseNow);
+          });
 
           // Update target facing angles. For the local player we use the
           // last input direction tracked by the prediction engine — the

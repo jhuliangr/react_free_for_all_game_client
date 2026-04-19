@@ -14,8 +14,11 @@ export const useGameStore = create<GameStateStore>()((set, get) => ({
   players: {},
   lastSeenAt: {},
   lastCombatEvent: null,
+  pickups: [],
 
   setMyPlayerId: (id) => set({ myPlayerId: id }),
+
+  setPickups: (pickups) => set({ pickups }),
 
   applyStateUpdate: (diffs: PlayerDiff[]) => {
     // The server's `removed` list is ignored intentionally: it does not
@@ -54,5 +57,6 @@ export const useGameStore = create<GameStateStore>()((set, get) => ({
       players: {},
       lastSeenAt: {},
       lastCombatEvent: null,
+      pickups: [],
     }),
 }));

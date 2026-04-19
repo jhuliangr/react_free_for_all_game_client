@@ -118,6 +118,8 @@ export function Game() {
             <Joystick side="left" onMove={mobileControls.onMoveJoystick} />
             <Joystick
               side="right"
+              deadzone={0.3}
+              onStart={mobileControls.onAttackStart}
               onMove={mobileControls.onAttackJoystick}
               onEnd={mobileControls.onAttackEnd}
             />

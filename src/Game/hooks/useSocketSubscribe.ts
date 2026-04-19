@@ -57,7 +57,7 @@ export function useSocketSubscribe() {
   const [reconnecting, setReconnecting] = useState(false);
   const [lastUnlockedAchievement, setLastUnlockedAchievement] =
     useState<Achivement | null>(null);
-  const { setMyPlayerId, applyStateUpdate, setCombatEvent, reset } =
+  const { setMyPlayerId, applyStateUpdate, setCombatEvent, setPickups, reset } =
     useGameStore();
   const navigate = useNavigate();
   const playerNameRef = useRef<string | null>(null);
@@ -83,6 +83,7 @@ export function useSocketSubscribe() {
         case 'state_update': {
           const update = msg as StateUpdateMessage;
           applyStateUpdate(update.players);
+          setPickups(update.pickups);
           predictionEngine.onStateUpdate(update);
           const myId = useGameStore.getState().myPlayerId;
           const me = myId ? useGameStore.getState().players[myId] : null;
@@ -146,7 +147,14 @@ export function useSocketSubscribe() {
       unsubReconnectFail();
       gameSocket.disconnect();
     };
-  }, [setCombatEvent, setMyPlayerId, applyStateUpdate, reset, navigate]);
+  }, [
+    setCombatEvent,
+    setMyPlayerId,
+    applyStateUpdate,
+    setPickups,
+    reset,
+    navigate,
+  ]);
 
   const join = useCallback((name: string) => {
     playerNameRef.current = name;
