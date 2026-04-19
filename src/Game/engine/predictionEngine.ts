@@ -56,6 +56,11 @@ export class PredictionEngine {
   // corrections without snapping.
   private displayedPos: Position | null = null;
   private lastLocalMoveAt = -Infinity;
+  // Angle of the most recent non-zero input. This is the player's *intent*
+  // and is the correct source for the local sprite's facing direction:
+  // unlike the rendered-position delta, it never flips when reconciliation
+  // eases the displayed position a pixel or two backwards.
+  private lastInputAngle: number | null = null;
 
   reset() {
     this.myId = null;
@@ -64,6 +69,7 @@ export class PredictionEngine {
     this.predictedPos = null;
     this.displayedPos = null;
     this.lastLocalMoveAt = -Infinity;
+    this.lastInputAngle = null;
   }
 
   onWelcome(msg: WelcomeMessage) {
@@ -85,6 +91,10 @@ export class PredictionEngine {
    */
   applyLocalMove(dx: number, dy: number, clientTick: number): Position | null {
     if (dx === 0 && dy === 0) return null;
+    // Track intent even if the input is rate-limited or the predicted
+    // baseline isn't ready — the facing should still reflect the last
+    // direction the player asked for.
+    this.lastInputAngle = Math.atan2(dy, dx);
     if (this.predictedPos === null) return null;
 
     const now = performance.now();
@@ -94,6 +104,10 @@ export class PredictionEngine {
     this.pendingInputs.push({ tick: clientTick, dx, dy });
     this.predictedPos = simulateMove(this.predictedPos, dx, dy);
     return { ...this.predictedPos };
+  }
+
+  getLastInputAngle(): number | null {
+    return this.lastInputAngle;
   }
 
   onStateUpdate(msg: StateUpdateMessage) {
