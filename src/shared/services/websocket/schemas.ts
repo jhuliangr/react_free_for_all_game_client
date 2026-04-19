@@ -50,15 +50,22 @@ export const ErrorMessageSchema = z.object({
   reason: z.string(),
 });
 
+export const KickedMessageSchema = z.object({
+  type: z.literal('kicked'),
+  reason: z.string(),
+});
+
 export type WelcomeMessage = z.infer<typeof WelcomeMessageSchema>;
 export type StateUpdateMessage = z.infer<typeof StateUpdateMessageSchema>;
 export type CombatEventMessage = z.infer<typeof CombatEventMessageSchema>;
 export type ErrorMessage = z.infer<typeof ErrorMessageSchema>;
+export type KickedMessage = z.infer<typeof KickedMessageSchema>;
 
 export type ServerMessage =
   | WelcomeMessage
   | StateUpdateMessage
   | CombatEventMessage
-  | ErrorMessage;
+  | ErrorMessage
+  | KickedMessage;
 
 export type MessageHandler = (msg: ServerMessage) => void;

@@ -1,6 +1,7 @@
 import {
   gameSocket,
   type CombatEventMessage,
+  type KickedMessage,
   type StateUpdateMessage,
   type WelcomeMessage,
 } from '#shared/services/websocket';
@@ -9,6 +10,32 @@ import type { Achivement } from '#shared/services/game';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { predictionEngine } from '../engine/predictionEngine';
+
+const PLAYER_ID_KEY = 'multiplayer.playerId';
+
+function loadStoredPlayerId(): string | undefined {
+  try {
+    return localStorage.getItem(PLAYER_ID_KEY) ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function storePlayerId(id: string) {
+  try {
+    localStorage.setItem(PLAYER_ID_KEY, id);
+  } catch {
+    /* storage unavailable — best effort */
+  }
+}
+
+function clearStoredPlayerId() {
+  try {
+    localStorage.removeItem(PLAYER_ID_KEY);
+  } catch {
+    /* storage unavailable — best effort */
+  }
+}
 
 function checkAchievements(kills: number, level: number): Achivement | null {
   const { achievements, unlockedAchievementIds, unlockAchievement } =
@@ -46,6 +73,7 @@ export function useSocketSubscribe() {
           predictionEngine.reset();
           gameSocket.resetClientTick();
           setMyPlayerId(welcome.playerId);
+          storePlayerId(welcome.playerId);
           applyStateUpdate([welcome.player]);
           predictionEngine.onWelcome(welcome);
           setJoined(true);
@@ -67,13 +95,33 @@ export function useSocketSubscribe() {
         case 'combat_event':
           setCombatEvent(msg as CombatEventMessage);
           break;
+        case 'kicked': {
+          const kicked = msg as KickedMessage;
+          console.warn(
+            'Session taken over by another connection:',
+            kicked.reason,
+          );
+          playerNameRef.current = null;
+          clearStoredPlayerId();
+          reset();
+          predictionEngine.reset();
+          setJoined(false);
+          setReconnecting(false);
+          gameSocket.disconnect();
+          gameSocket.connect();
+          navigate('/play', {
+            replace: true,
+            state: { kicked: kicked.reason },
+          });
+          break;
+        }
       }
     });
 
     const unsubClose = gameSocket.onClose(() => {
       if (playerNameRef.current) {
         setReconnecting(true);
-        const myId = useGameStore.getState().myPlayerId;
+        const myId = useGameStore.getState().myPlayerId ?? loadStoredPlayerId();
         reset();
         predictionEngine.reset();
         const { selectedCharacter } = useSettingsStore.getState();
@@ -103,11 +151,13 @@ export function useSocketSubscribe() {
   const join = useCallback((name: string) => {
     playerNameRef.current = name;
     const { selectedCharacter } = useSettingsStore.getState();
-    gameSocket.join(name, undefined, selectedCharacter);
+    const storedId = loadStoredPlayerId();
+    gameSocket.join(name, storedId, selectedCharacter);
   }, []);
 
   const leave = useCallback(() => {
     playerNameRef.current = null;
+    clearStoredPlayerId();
     gameSocket.disconnect();
     gameSocket.connect();
     reset();
@@ -119,6 +169,7 @@ export function useSocketSubscribe() {
 
   const lost = useCallback(() => {
     playerNameRef.current = null;
+    clearStoredPlayerId();
     gameSocket.disconnect();
     gameSocket.connect();
     reset();

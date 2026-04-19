@@ -5,6 +5,7 @@ export type {
   WelcomeMessage,
   CombatEventMessage,
   ErrorMessage,
+  KickedMessage,
   MessageHandler,
   StateUpdateMessage,
 } from './schemas';
