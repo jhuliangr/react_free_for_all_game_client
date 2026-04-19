@@ -61,6 +61,7 @@ export function useSocketSubscribe() {
     useGameStore();
   const navigate = useNavigate();
   const playerNameRef = useRef<string | null>(null);
+  const lastKillerNameRef = useRef<string | null>(null);
 
   useEffect(() => {
     gameSocket.connect();
@@ -93,9 +94,21 @@ export function useSocketSubscribe() {
           }
           break;
         }
-        case 'combat_event':
-          setCombatEvent(msg as CombatEventMessage);
+        case 'combat_event': {
+          const event = msg as CombatEventMessage;
+          setCombatEvent(event);
+          const myId = useGameStore.getState().myPlayerId;
+          if (myId && event.defenderId === myId) {
+            if (event.attackerId === 'dot') {
+              lastKillerNameRef.current = 'damage effect';
+            } else {
+              const attacker =
+                useGameStore.getState().players[event.attackerId];
+              lastKillerNameRef.current = attacker?.name ?? 'a player';
+            }
+          }
           break;
+        }
         case 'kicked': {
           const kicked = msg as KickedMessage;
           console.warn(
@@ -176,6 +189,8 @@ export function useSocketSubscribe() {
   }, [reset, navigate]);
 
   const lost = useCallback(() => {
+    const killerName = lastKillerNameRef.current;
+    lastKillerNameRef.current = null;
     playerNameRef.current = null;
     clearStoredPlayerId();
     gameSocket.disconnect();
@@ -184,6 +199,7 @@ export function useSocketSubscribe() {
     setJoined(false);
     navigate('/game-over', {
       replace: true,
+      state: { killerName },
     });
   }, [reset, navigate]);
 
