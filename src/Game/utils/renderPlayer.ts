@@ -16,10 +16,12 @@ export const renderPlayer = (
   facingAngle: number,
   hitTime: number | null,
   dotStartTime: number | null,
+  animationFrame: HTMLImageElement | null,
 ) => {
   const sx = p.x * SCALE_X + offsetX;
   const sy = p.y * SCALE_Y + offsetY;
-  const sprite = sprites[p.character] ?? Object.values(sprites)[0];
+  const staticSprite = sprites[p.character] ?? Object.values(sprites)[0];
+  const sprite = animationFrame ?? staticSprite;
 
   if (sprite && import.meta.env.VITE_SPRITES === 'true') {
     const half = SPRITE_SIZE / 2;

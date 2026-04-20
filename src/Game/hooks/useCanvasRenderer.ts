@@ -3,6 +3,7 @@ import type { RefObject } from 'react';
 import { useEffect, useRef } from 'react';
 import { characterRegistry } from '../characters';
 import { predictionEngine } from '../engine/predictionEngine';
+import type { AnimationMap } from './usePlayerAnimations';
 import {
   CANVAS_H,
   CANVAS_W,
@@ -15,6 +16,13 @@ import {
   renderPlayer,
   renderVignette,
 } from '../utils';
+
+const WALK_FRAME_MS = 120;
+// A single frame above this delta marks the player as "walking" for
+// WALK_HOLD_MS — smooths over frames where a server-update gap or
+// reconciliation correction briefly produces a sub-threshold delta.
+const WALK_MIN_DELTA = 0.3;
+const WALK_HOLD_MS = 200;
 
 function lerpAngle(current: number, target: number, t: number): number {
   let diff = target - current;
@@ -50,6 +58,7 @@ export function useCanvasRenderer(
     Record<string, { angle: number; startTime: number }>
   >,
   bgImageRef: RefObject<HTMLImageElement | null>,
+  animationsRef?: RefObject<AnimationMap>,
 ) {
   const prevPositions = useRef<Record<string, { x: number; y: number }>>({});
   const smoothedRemote = useRef<Record<string, { x: number; y: number }>>({});
@@ -57,6 +66,7 @@ export function useCanvasRenderer(
   const facingAngles = useRef<Record<string, number>>({});
   const hitTimesRef = useRef<Record<string, number>>({});
   const dotPlayersRef = useRef<Record<string, number>>({});
+  const lastMovingAtRef = useRef<Record<string, number>>({});
   const lastCombatRef = useRef<object | null>(null);
 
   useEffect(() => {
@@ -156,19 +166,23 @@ export function useCanvasRenderer(
           // For remote players we use the position delta but reject tiny
           // magnitudes (interpolation noise) via FACING_MIN_DELTA.
           const localInputAngle = predictionEngine.getLastInputAngle();
+          const motionNow = performance.now();
           Object.values(players).forEach((p) => {
             const pos = renderedPositions[p.id];
             const prev = prevPositions.current[p.id];
-            if (p.id === myPlayerId) {
-              if (localInputAngle !== null) {
-                targetFacingAngles.current[p.id] = localInputAngle;
-              }
-            } else if (prev) {
+            if (prev) {
               const ddx = pos.x - prev.x;
               const ddy = pos.y - prev.y;
-              if (Math.hypot(ddx, ddy) > FACING_MIN_DELTA) {
+              const mag = Math.hypot(ddx, ddy);
+              if (mag > WALK_MIN_DELTA) {
+                lastMovingAtRef.current[p.id] = motionNow;
+              }
+              if (p.id !== myPlayerId && mag > FACING_MIN_DELTA) {
                 targetFacingAngles.current[p.id] = Math.atan2(ddy, ddx);
               }
+            }
+            if (p.id === myPlayerId && localInputAngle !== null) {
+              targetFacingAngles.current[p.id] = localInputAngle;
             }
             prevPositions.current[p.id] = { x: pos.x, y: pos.y };
           });
@@ -195,8 +209,48 @@ export function useCanvasRenderer(
           }
 
           ctx.font = '11px sans-serif';
+          const animNow = performance.now();
           Object.values(players).forEach((p) => {
             const pos = renderedPositions[p.id];
+            const animations = animationsRef?.current?.[p.character];
+
+            let animationFrame: HTMLImageElement | null = null;
+            if (animations) {
+              const attack =
+                p.id === myPlayerId
+                  ? (attackFlashRef.current ?? null)
+                  : (activeAttacksRef.current[p.id] ?? null);
+              const attackFrames = animations.attack;
+              const walkFrames = animations.walk;
+              const charDef = characterRegistry.get(p.character);
+
+              if (attack && attackFrames && attackFrames.length > 0) {
+                const elapsed =
+                  p.id === myPlayerId
+                    ? performance.now() - attack.startTime
+                    : Date.now() - attack.startTime;
+                const progress = Math.min(
+                  elapsed / charDef.attackDurationMs,
+                  1,
+                );
+                const idx = Math.min(
+                  Math.floor(progress * attackFrames.length),
+                  attackFrames.length - 1,
+                );
+                animationFrame = attackFrames[idx];
+              } else if (walkFrames && walkFrames.length > 0) {
+                const lastMovingAt = lastMovingAtRef.current[p.id];
+                const moving =
+                  lastMovingAt !== undefined &&
+                  animNow - lastMovingAt < WALK_HOLD_MS;
+                if (moving) {
+                  const idx =
+                    Math.floor(animNow / WALK_FRAME_MS) % walkFrames.length;
+                  animationFrame = walkFrames[idx];
+                }
+              }
+            }
+
             renderPlayer(
               { ...p, x: pos.x, y: pos.y },
               ctx!,
@@ -207,6 +261,7 @@ export function useCanvasRenderer(
               facingAngles.current[p.id] ?? Math.PI / 2,
               hitTimesRef.current[p.id] ?? null,
               dotPlayersRef.current[p.id] ?? null,
+              animationFrame,
             );
           });
 

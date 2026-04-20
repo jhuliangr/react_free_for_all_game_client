@@ -107,3 +107,10 @@ src/
 | `/settings`    | Character and skin selector      |
 | `/achivements` | Achievements _(coming soon)_     |
 | `/game-over`   | Game over screen _(coming soon)_ |
+
+---
+
+## Credits
+
+- **Character sprites** (Knight, Golem, Rogue, Mage) — generated with Google Gemini.
+- **Character animations** (e.g. the knight walk cycle in `public/assets/sprites/knight-animations/`) — hand-drawn by the author in ibisPaint on a Samsung Galaxy Note 8.

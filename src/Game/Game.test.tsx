@@ -32,6 +32,7 @@ vi.mock('./hooks', () => ({
     cooldownActiveRef: { current: false },
   }),
   useOtherPlayersAttacks: () => ({ current: {} }),
+  usePlayerAnimations: () => ({ current: {} }),
   usePlayerSprite: () => ({ current: {} }),
   useSoundEffects: () => ({ playAttackSound: () => {} }),
 }));
