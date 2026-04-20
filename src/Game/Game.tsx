@@ -12,6 +12,7 @@ import {
   useKeyboardMapping,
   useMobileControls,
   useOtherPlayersAttacks,
+  usePlayerAnimations,
   usePlayerSprite,
   useSocketSubscribe,
   useSoundEffects,
@@ -38,6 +39,7 @@ export function Game() {
   const me = myPlayerId ? players[myPlayerId] : null;
 
   const spriteRef = usePlayerSprite();
+  const animationsRef = usePlayerAnimations();
   const bgImageRef = useBackgroundImage();
   const activeAttacksRef = useOtherPlayersAttacks(myPlayerId);
   const { playAttackSound } = useSoundEffects();
@@ -65,6 +67,7 @@ export function Game() {
     attackFlashRef,
     activeAttacksRef,
     bgImageRef,
+    animationsRef,
   );
 
   if (reconnecting) {

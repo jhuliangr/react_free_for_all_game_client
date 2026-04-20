@@ -6,6 +6,7 @@ export { useIsMobile } from './useIsMobile';
 export { useKeyboardMapping } from './useKeyboardMapping';
 export { useMobileControls } from './useMobileControls';
 export { useOtherPlayersAttacks } from './useOtherPlayersAttacks';
+export { usePlayerAnimations } from './usePlayerAnimations';
 export { usePlayerSprite } from './usePlayerSprite';
 export { useSocketSubscribe } from './useSocketSubscribe';
 export { useSoundEffects } from './useSoundEffects';
