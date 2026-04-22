@@ -49,6 +49,10 @@ export const StateUpdateMessageSchema = z.object({
 export const CombatEventMessageSchema = z.object({
   type: z.literal('combat_event'),
   attackerId: z.string(),
+  // For DoT ticks (`attackerId === 'dot'`) this carries the id of the
+  // player who originally applied the DoT. Lets the client credit the
+  // right killer in the game-over screen and in the event log.
+  sourceId: z.string().optional(),
   defenderId: z.string(),
   damage: z.number(),
 });
@@ -69,12 +73,17 @@ export const PongMessageSchema = z.object({
   serverTime: z.number(),
 });
 
+export const DiedMessageSchema = z.object({
+  type: z.literal('died'),
+});
+
 export type WelcomeMessage = z.infer<typeof WelcomeMessageSchema>;
 export type StateUpdateMessage = z.infer<typeof StateUpdateMessageSchema>;
 export type CombatEventMessage = z.infer<typeof CombatEventMessageSchema>;
 export type ErrorMessage = z.infer<typeof ErrorMessageSchema>;
 export type KickedMessage = z.infer<typeof KickedMessageSchema>;
 export type PongMessage = z.infer<typeof PongMessageSchema>;
+export type DiedMessage = z.infer<typeof DiedMessageSchema>;
 
 export type ServerMessage =
   | WelcomeMessage
@@ -82,6 +91,7 @@ export type ServerMessage =
   | CombatEventMessage
   | ErrorMessage
   | KickedMessage
-  | PongMessage;
+  | PongMessage
+  | DiedMessage;
 
 export type MessageHandler = (msg: ServerMessage) => void;

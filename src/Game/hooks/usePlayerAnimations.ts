@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import spriteManifest from 'virtual:sprite-manifest';
 import { characterRegistry } from '../characters';
 
 export const ANIMATION_NAMES = ['walk', 'attack'] as const;
@@ -8,8 +9,6 @@ export type CharacterAnimations = Partial<
   Record<AnimationName, HTMLImageElement[]>
 >;
 export type AnimationMap = Record<string, CharacterAnimations>;
-
-const MAX_FRAMES_PER_ANIMATION = 32;
 
 function loadImage(src: string): Promise<HTMLImageElement | null> {
   return new Promise((resolve) => {
@@ -23,15 +22,18 @@ function loadImage(src: string): Promise<HTMLImageElement | null> {
 async function loadAnimationFrames(
   characterId: string,
   anim: AnimationName,
+  count: number,
 ): Promise<HTMLImageElement[]> {
-  const frames: HTMLImageElement[] = [];
-  for (let i = 1; i <= MAX_FRAMES_PER_ANIMATION; i++) {
-    const path = `${import.meta.env.BASE_URL}assets/sprites/${characterId}-animations/${anim}-${i}.png`;
-    const img = await loadImage(path);
-    if (!img) break;
-    frames.push(img);
-  }
-  return frames;
+  // Load every frame in parallel — the frame count comes from the
+  // build-time sprite manifest (see vite.config.ts), so we know the
+  // exact range and never probe past the last frame.
+  const paths = Array.from(
+    { length: count },
+    (_, i) =>
+      `${import.meta.env.BASE_URL}assets/sprites/${characterId}-animations/${anim}-${i + 1}.png`,
+  );
+  const imgs = await Promise.all(paths.map(loadImage));
+  return imgs.filter((img): img is HTMLImageElement => img !== null);
 }
 
 export function usePlayerAnimations() {
@@ -40,8 +42,12 @@ export function usePlayerAnimations() {
   useEffect(() => {
     for (const charDef of characterRegistry.getAll()) {
       animationsRef.current[charDef.id] = {};
+      const charFrames = spriteManifest[charDef.id];
+      if (!charFrames) continue;
       for (const anim of ANIMATION_NAMES) {
-        loadAnimationFrames(charDef.id, anim).then((frames) => {
+        const count = charFrames[anim] ?? 0;
+        if (count <= 0) continue;
+        loadAnimationFrames(charDef.id, anim, count).then((frames) => {
           if (frames.length > 0) {
             animationsRef.current[charDef.id][anim] = frames;
           }
