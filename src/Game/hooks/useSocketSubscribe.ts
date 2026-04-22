@@ -2,14 +2,17 @@ import {
   gameSocket,
   type CombatEventMessage,
   type KickedMessage,
+  type PongMessage,
   type StateUpdateMessage,
   type WelcomeMessage,
 } from '#shared/services/websocket';
+import { clockSync } from '#shared/services/clock-sync';
 import { useGameStore, useSettingsStore } from '#shared/stores';
 import type { Achivement } from '#shared/services/game';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { predictionEngine } from '../engine/predictionEngine';
+import { snapshotInterpolator } from '../engine/snapshotInterpolator';
 
 const PLAYER_ID_KEY = 'multiplayer.playerId';
 
@@ -65,6 +68,7 @@ export function useSocketSubscribe() {
 
   useEffect(() => {
     gameSocket.connect();
+    clockSync.start(gameSocket);
 
     const unsubMessage = gameSocket.onMessage((msg) => {
       switch (msg.type) {
@@ -72,6 +76,7 @@ export function useSocketSubscribe() {
           const welcome = msg as WelcomeMessage;
           reset();
           predictionEngine.reset();
+          snapshotInterpolator.reset();
           gameSocket.resetClientTick();
           setMyPlayerId(welcome.playerId);
           storePlayerId(welcome.playerId);
@@ -86,12 +91,17 @@ export function useSocketSubscribe() {
           applyStateUpdate(update.players);
           setPickups(update.pickups);
           predictionEngine.onStateUpdate(update);
+          snapshotInterpolator.ingest(update, clockSync.getServerTime());
           const myId = useGameStore.getState().myPlayerId;
           const me = myId ? useGameStore.getState().players[myId] : null;
           if (me) {
             const unlocked = checkAchievements(me.kills, me.level);
             if (unlocked) setLastUnlockedAchievement(unlocked);
           }
+          break;
+        }
+        case 'pong': {
+          clockSync.onPong(msg as PongMessage);
           break;
         }
         case 'combat_event': {
@@ -119,10 +129,13 @@ export function useSocketSubscribe() {
           clearStoredPlayerId();
           reset();
           predictionEngine.reset();
+          snapshotInterpolator.reset();
+          clockSync.reset();
           setJoined(false);
           setReconnecting(false);
           gameSocket.disconnect();
           gameSocket.connect();
+          clockSync.start(gameSocket);
           navigate('/play', {
             replace: true,
             state: { kicked: kicked.reason },
@@ -138,6 +151,7 @@ export function useSocketSubscribe() {
         const myId = useGameStore.getState().myPlayerId ?? loadStoredPlayerId();
         reset();
         predictionEngine.reset();
+        snapshotInterpolator.reset();
         const { selectedCharacter } = useSettingsStore.getState();
         gameSocket.join(
           playerNameRef.current,
@@ -158,6 +172,7 @@ export function useSocketSubscribe() {
       unsubMessage();
       unsubClose();
       unsubReconnectFail();
+      clockSync.stop();
       gameSocket.disconnect();
     };
   }, [

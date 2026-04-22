@@ -9,5 +9,6 @@ export type {
   KickedMessage,
   MessageHandler,
   StateUpdateMessage,
+  PongMessage,
 } from './schemas';
 export const gameSocket = new GameSocket();

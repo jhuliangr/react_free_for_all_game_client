@@ -4,7 +4,13 @@ import { useCallback, useEffect, useRef } from 'react';
 import { characterRegistry } from '../characters';
 import { predictionEngine } from '../engine/predictionEngine';
 
-const MOVE_TICK_MS = 50;
+// Matches server MOVE_MIN_INTERVAL_MS (25ms) with a small cushion for
+// RAF scheduling jitter. Direction changes bypass the hold-repeat
+// interval as long as this floor has elapsed.
+const MIN_SEND_INTERVAL_MS = 30;
+// Cadence at which a held joystick direction is re-sent. Equal to the
+// prediction engine's accept interval.
+const HOLD_REPEAT_MS = 40;
 const DEADZONE = 0.2;
 export const ATTACK_DEADZONE = 0.3;
 const MIN_ATTACK_INTERVAL_MS = 200;
@@ -16,7 +22,9 @@ export function useMobileControls(
 ) {
   const moveDx = useRef(0);
   const moveDy = useRef(0);
-  const tickRef = useRef<number | null>(null);
+  const lastSentDx = useRef(0);
+  const lastSentDy = useRef(0);
+  const lastSentAt = useRef(-Infinity);
 
   const attackFlashRef = useRef<{ angle: number; startTime: number } | null>(
     null,
@@ -88,23 +96,44 @@ export function useMobileControls(
   useEffect(() => {
     if (!joined) return;
 
-    tickRef.current = window.setInterval(() => {
+    let rafId = 0;
+    let cancelled = false;
+
+    const pump = () => {
+      if (cancelled) return;
       const dx = moveDx.current;
       const dy = moveDy.current;
-
-      if (Math.abs(dx) < DEADZONE && Math.abs(dy) < DEADZONE) return;
-
       const normDx = dx > DEADZONE ? 1 : dx < -DEADZONE ? -1 : 0;
       const normDy = dy > DEADZONE ? 1 : dy < -DEADZONE ? -1 : 0;
+      const now = performance.now();
+      const sinceLast = now - lastSentAt.current;
 
-      if (normDx === 0 && normDy === 0) return;
-      const tick = gameSocket.nextClientTick();
-      predictionEngine.applyLocalMove(normDx, normDy, tick);
-      gameSocket.move(normDx, normDy, tick);
-    }, MOVE_TICK_MS);
+      if (normDx === 0 && normDy === 0) {
+        lastSentDx.current = 0;
+        lastSentDy.current = 0;
+      } else {
+        const changed =
+          normDx !== lastSentDx.current || normDy !== lastSentDy.current;
+        if (
+          sinceLast >= MIN_SEND_INTERVAL_MS &&
+          (changed || sinceLast >= HOLD_REPEAT_MS)
+        ) {
+          const tick = gameSocket.nextClientTick();
+          predictionEngine.applyLocalMove(normDx, normDy, tick);
+          gameSocket.move(normDx, normDy, tick);
+          lastSentDx.current = normDx;
+          lastSentDy.current = normDy;
+          lastSentAt.current = now;
+        }
+      }
 
+      rafId = requestAnimationFrame(pump);
+    };
+
+    rafId = requestAnimationFrame(pump);
     return () => {
-      if (tickRef.current) clearInterval(tickRef.current);
+      cancelled = true;
+      cancelAnimationFrame(rafId);
     };
   }, [joined]);
 

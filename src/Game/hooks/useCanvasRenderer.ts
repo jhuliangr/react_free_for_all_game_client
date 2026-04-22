@@ -1,8 +1,10 @@
 import { useGameStore } from '#shared/stores';
+import { clockSync } from '#shared/services/clock-sync';
 import type { RefObject } from 'react';
 import { useEffect, useRef } from 'react';
 import { characterRegistry } from '../characters';
 import { predictionEngine } from '../engine/predictionEngine';
+import { snapshotInterpolator } from '../engine/snapshotInterpolator';
 import type { AnimationMap } from './usePlayerAnimations';
 import {
   CANVAS_H,
@@ -31,16 +33,12 @@ function lerpAngle(current: number, target: number, t: number): number {
   return current + diff * t;
 }
 
-// Per-frame lerp factor used to smooth remote players toward their latest
-// server-confirmed position. Half-life ~2.4 frames (~40ms at 60Hz): near
-// players (50ms updates) barely lag; mid-range players (~150ms updates)
-// transition continuously instead of teleporting every third tick.
-const REMOTE_SMOOTH = 0.25;
-// When a remote player jumps more than this in a single frame, the cause is
-// almost certainly a respawn / re-entry after the 1s grace period, not real
-// motion. Snap to the new position to avoid a long visible glide across the
-// map. Upper bound on legitimate per-frame motion is ~10 units after a 150ms
-// throttle gap.
+// If the interpolated position and the latest authoritative position
+// differ by more than this, the cause is almost certainly a respawn /
+// re-entry after the grace period, not real motion. Snap instead of
+// flying across the map. Upper bound on legitimate inter-snapshot
+// motion at the server's speed cap (200u/s) over a 150ms throttle is
+// ~30 units; this gives comfortable headroom.
 const REMOTE_SNAP_THRESHOLD = 80;
 // Minimum per-frame position delta (world units) required to update a
 // remote player's facing target. Below this, the delta is dominated by
@@ -61,7 +59,9 @@ export function useCanvasRenderer(
   animationsRef?: RefObject<AnimationMap>,
 ) {
   const prevPositions = useRef<Record<string, { x: number; y: number }>>({});
-  const smoothedRemote = useRef<Record<string, { x: number; y: number }>>({});
+  const lastRenderedRemote = useRef<Record<string, { x: number; y: number }>>(
+    {},
+  );
   const targetFacingAngles = useRef<Record<string, number>>({});
   const facingAngles = useRef<Record<string, number>>({});
   const hitTimesRef = useRef<Record<string, number>>({});
@@ -100,11 +100,14 @@ export function useCanvasRenderer(
         // Resolve on-screen position for every player:
         //  - local player: client-predicted + smoothed toward the latest
         //    reconciled position.
-        //  - others: eased toward the store's last server-confirmed
-        //    coordinates. This smooths both the per-tick micro-jumps of
-        //    nearby players (50ms updates) and the larger jumps of
-        //    throttled mid-range players (~150ms between updates) into
-        //    continuous motion.
+        //  - others: snapshot interpolation — we render `interpDelay`
+        //    milliseconds in the past between two known server
+        //    snapshots. That produces continuous motion at the real
+        //    per-entity speed, independent of tick throttling or
+        //    packet jitter. `interpDelay` adapts to measured jitter
+        //    via clockSync.
+        const renderTime =
+          clockSync.getServerTime() - clockSync.getInterpDelay();
         const renderedPositions: Record<string, { x: number; y: number }> = {};
         Object.values(players).forEach((p) => {
           if (p.id === myPlayerId) {
@@ -116,29 +119,31 @@ export function useCanvasRenderer(
             };
             return;
           }
-          const target = { x: p.x, y: p.y };
-          const prev = smoothedRemote.current[p.id];
-          let next: { x: number; y: number };
-          if (!prev) {
-            next = target;
-          } else if (
-            Math.hypot(target.x - prev.x, target.y - prev.y) >
-            REMOTE_SNAP_THRESHOLD
-          ) {
-            next = target;
-          } else {
-            next = {
-              x: prev.x + (target.x - prev.x) * REMOTE_SMOOTH,
-              y: prev.y + (target.y - prev.y) * REMOTE_SMOOTH,
-            };
-          }
-          smoothedRemote.current[p.id] = next;
+          const interpolated = snapshotInterpolator.getRenderPosition(
+            p.id,
+            renderTime,
+            { x: p.x, y: p.y },
+          );
+          // Snap guard: if the authoritative store position differs
+          // wildly from what we just interpolated, it's almost
+          // certainly a respawn. Jump rather than glide.
+          const authoritative = { x: p.x, y: p.y };
+          const gap = Math.hypot(
+            authoritative.x - interpolated.x,
+            authoritative.y - interpolated.y,
+          );
+          const next =
+            gap > REMOTE_SNAP_THRESHOLD ? authoritative : interpolated;
+          lastRenderedRemote.current[p.id] = next;
           renderedPositions[p.id] = next;
         });
 
-        // Drop smoothed state for players no longer in the store.
-        for (const id of Object.keys(smoothedRemote.current)) {
-          if (!players[id]) delete smoothedRemote.current[id];
+        // Drop interpolation state for players no longer in the store.
+        for (const id of Object.keys(lastRenderedRemote.current)) {
+          if (!players[id]) {
+            delete lastRenderedRemote.current[id];
+            snapshotInterpolator.drop(id);
+          }
         }
 
         const mePos = meAuthoritative
