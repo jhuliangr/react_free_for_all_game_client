@@ -49,6 +49,10 @@ export const StateUpdateMessageSchema = z.object({
 export const CombatEventMessageSchema = z.object({
   type: z.literal('combat_event'),
   attackerId: z.string(),
+  // For DoT ticks (`attackerId === 'dot'`) this carries the id of the
+  // player who originally applied the DoT. Lets the client credit the
+  // right killer in the game-over screen and in the event log.
+  sourceId: z.string().optional(),
   defenderId: z.string(),
   damage: z.number(),
 });

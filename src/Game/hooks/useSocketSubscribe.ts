@@ -65,6 +65,11 @@ export function useSocketSubscribe() {
   const navigate = useNavigate();
   const playerNameRef = useRef<string | null>(null);
   const lastKillerNameRef = useRef<string | null>(null);
+  // Remembers every attacker's name the first time we see them in a
+  // combat_event for ourselves. DoT ticks that arrive after the mage
+  // walks out of visibility range would otherwise fall back to
+  // "a player" because `players[sourceId]` is no longer populated.
+  const attackerNamesRef = useRef<Record<string, string>>({});
   // Mirror of `lost` so the state_update handler inside the mount-only
   // effect can call it without being retriggered when the callback
   // identity changes.
@@ -81,6 +86,7 @@ export function useSocketSubscribe() {
           reset();
           predictionEngine.reset();
           snapshotInterpolator.reset();
+          attackerNamesRef.current = {};
           gameSocket.resetClientTick();
           setMyPlayerId(welcome.playerId);
           storePlayerId(welcome.playerId);
@@ -135,12 +141,20 @@ export function useSocketSubscribe() {
           setCombatEvent(event);
           const myId = useGameStore.getState().myPlayerId;
           if (myId && event.defenderId === myId) {
-            if (event.attackerId === 'dot') {
-              lastKillerNameRef.current = 'damage effect';
+            // Credit the real applier for DoT ticks via `sourceId`
+            // when the server provided one. Falls back to the generic
+            // label only for environmental / unsourced DoTs.
+            const attributionId =
+              event.attackerId === 'dot'
+                ? (event.sourceId ?? null)
+                : event.attackerId;
+            if (attributionId) {
+              const live = useGameStore.getState().players[attributionId]?.name;
+              if (live) attackerNamesRef.current[attributionId] = live;
+              lastKillerNameRef.current =
+                attackerNamesRef.current[attributionId] ?? 'a player';
             } else {
-              const attacker =
-                useGameStore.getState().players[event.attackerId];
-              lastKillerNameRef.current = attacker?.name ?? 'a player';
+              lastKillerNameRef.current = 'damage effect';
             }
           }
           break;
