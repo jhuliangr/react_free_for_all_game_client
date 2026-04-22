@@ -10,5 +10,6 @@ export type {
   MessageHandler,
   StateUpdateMessage,
   PongMessage,
+  DiedMessage,
 } from './schemas';
 export const gameSocket = new GameSocket();

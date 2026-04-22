@@ -69,12 +69,17 @@ export const PongMessageSchema = z.object({
   serverTime: z.number(),
 });
 
+export const DiedMessageSchema = z.object({
+  type: z.literal('died'),
+});
+
 export type WelcomeMessage = z.infer<typeof WelcomeMessageSchema>;
 export type StateUpdateMessage = z.infer<typeof StateUpdateMessageSchema>;
 export type CombatEventMessage = z.infer<typeof CombatEventMessageSchema>;
 export type ErrorMessage = z.infer<typeof ErrorMessageSchema>;
 export type KickedMessage = z.infer<typeof KickedMessageSchema>;
 export type PongMessage = z.infer<typeof PongMessageSchema>;
+export type DiedMessage = z.infer<typeof DiedMessageSchema>;
 
 export type ServerMessage =
   | WelcomeMessage
@@ -82,6 +87,7 @@ export type ServerMessage =
   | CombatEventMessage
   | ErrorMessage
   | KickedMessage
-  | PongMessage;
+  | PongMessage
+  | DiedMessage;
 
 export type MessageHandler = (msg: ServerMessage) => void;

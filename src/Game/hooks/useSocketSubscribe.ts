@@ -65,6 +65,10 @@ export function useSocketSubscribe() {
   const navigate = useNavigate();
   const playerNameRef = useRef<string | null>(null);
   const lastKillerNameRef = useRef<string | null>(null);
+  // Mirror of `lost` so the state_update handler inside the mount-only
+  // effect can call it without being retriggered when the callback
+  // identity changes.
+  const lostRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     gameSocket.connect();
@@ -88,11 +92,24 @@ export function useSocketSubscribe() {
         }
         case 'state_update': {
           const update = msg as StateUpdateMessage;
+          const myId = useGameStore.getState().myPlayerId;
+          // Server-side removal of the local player = we've died.
+          // This is the only reliable death signal for DoT kills: the
+          // server removes the player inside process_dots *after* the
+          // tick's state_update was already broadcast, so the previous
+          // frame still showed us with positive HP. The next tick's
+          // state_update drops us from `players` and lists us in
+          // `removed`. Melee kills happen to broadcast hp=0 first, but
+          // relying on this is more robust and handles future paths
+          // (server kick, timeout, etc.) uniformly.
+          if (myId && update.removed.includes(myId)) {
+            lostRef.current();
+            break;
+          }
           applyStateUpdate(update.players);
           setPickups(update.pickups);
           predictionEngine.onStateUpdate(update);
           snapshotInterpolator.ingest(update, clockSync.getServerTime());
-          const myId = useGameStore.getState().myPlayerId;
           const me = myId ? useGameStore.getState().players[myId] : null;
           if (me) {
             const unlocked = checkAchievements(me.kills, me.level);
@@ -102,6 +119,15 @@ export function useSocketSubscribe() {
         }
         case 'pong': {
           clockSync.onPong(msg as PongMessage);
+          break;
+        }
+        case 'died': {
+          // Server signals that the player was removed from the game
+          // (DoT kill, melee kill, or any future server-driven death).
+          // The server stops sending state_updates after removal, so
+          // this is the only reliable signal for deaths whose killing
+          // blow wasn't broadcast with hp=0.
+          lostRef.current();
           break;
         }
         case 'combat_event': {
@@ -204,6 +230,11 @@ export function useSocketSubscribe() {
   }, [reset, navigate]);
 
   const lost = useCallback(() => {
+    // Idempotency guard. Two death signals can race: useDeathDetection
+    // firing from a state_update with hp=0, and our in-handler check
+    // picking up the `removed` list on the following tick. Without
+    // this we'd disconnect/reconnect twice and navigate twice.
+    if (useGameStore.getState().myPlayerId === null) return;
     const killerName = lastKillerNameRef.current;
     lastKillerNameRef.current = null;
     playerNameRef.current = null;
@@ -211,12 +242,22 @@ export function useSocketSubscribe() {
     gameSocket.disconnect();
     gameSocket.connect();
     reset();
+    predictionEngine.reset();
+    snapshotInterpolator.reset();
     setJoined(false);
     navigate('/game-over', {
       replace: true,
       state: { killerName },
     });
   }, [reset, navigate]);
+
+  // Keep the ref aligned with the latest lost() so the message-handler
+  // closure (captured once at mount) always calls the current impl.
+  // `lost` is memoized on stable deps, so this effect runs at most on
+  // mount — but keeping it in an effect is the correct React shape.
+  useEffect(() => {
+    lostRef.current = lost;
+  }, [lost]);
 
   return {
     joined,
