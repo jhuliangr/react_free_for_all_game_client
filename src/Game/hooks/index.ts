@@ -2,6 +2,7 @@ export { useAttackAnimation } from './useAttackAnimation';
 export { useBackgroundImage } from './useBackgroundImage';
 export { useCanvasRenderer } from './useCanvasRenderer';
 export { useDeathDetection } from './useDeathDetection';
+export { useHapticFeedback } from './useHapticFeedback';
 export { useIsMobile } from './useIsMobile';
 export { useKeyboardMapping } from './useKeyboardMapping';
 export { useMobileControls } from './useMobileControls';
