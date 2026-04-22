@@ -148,6 +148,10 @@ export class GameSocket {
     this.send({ type: 'equip', slot, itemId });
   }
 
+  ping(t: number) {
+    this.send({ type: 'ping', t });
+  }
+
   disconnect() {
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
