@@ -9,6 +9,7 @@ const join = vi.fn();
 const onMessage = vi.fn(() => () => {});
 const onClose = vi.fn(() => () => {});
 const onReconnectFail = vi.fn(() => () => {});
+const ping = vi.fn();
 
 vi.mock('#shared/services/websocket', () => ({
   gameSocket: {
@@ -18,6 +19,7 @@ vi.mock('#shared/services/websocket', () => ({
     onMessage: () => onMessage(),
     onClose: () => onClose(),
     onReconnectFail: () => onReconnectFail(),
+    ping: (t: number) => ping(t),
   },
 }));
 
