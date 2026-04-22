@@ -8,6 +8,7 @@ import {
   useBackgroundImage,
   useCanvasRenderer,
   useDeathDetection,
+  useHapticFeedback,
   useIsMobile,
   useKeyboardMapping,
   useMobileControls,
@@ -61,6 +62,7 @@ export function Game() {
     : desktopAttack.cooldownActiveRef;
 
   useDeathDetection(me, lost);
+  useHapticFeedback();
   useCanvasRenderer(
     canvasRef,
     spriteRef,

@@ -24,6 +24,7 @@ vi.mock('./hooks', () => ({
   useBackgroundImage: () => ({ current: null }),
   useCanvasRenderer: () => {},
   useDeathDetection: () => {},
+  useHapticFeedback: () => {},
   useMobileControls: () => ({
     onMoveJoystick: () => {},
     onAttackJoystick: () => {},
