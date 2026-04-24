@@ -16,22 +16,28 @@ export const SkinSelector: React.FC = () => {
   };
   return (
     <div className="md:flex gap-3 rounded-xl">
-      {skins.map((skin) => (
-        <img
-          key={skin.id}
-          src={`${import.meta.env.BASE_URL}assets/${selectedCharacter.toLowerCase()}-${skin.id.replace('skin_', '')}-skin.png`}
-          alt={skin.name}
-          className={cn(
-            'w-36 cursor-pointer hover:opacity-80 transition-all duration-200 rounded-lg',
-            {
-              'blur-sm cursor-not-allowed md:block hidden':
-                skin.unlockCondition !== null,
-              'border-2': selectedSkin?.id === skin.id,
-            },
-          )}
-          onClick={() => handleSelectSkin(skin)}
-        />
-      ))}
+      {skins
+        .filter((s) =>
+          !import.meta.env.VITE_SHOW_INCOMPLETE_SPRITES
+            ? s.id === 'skin_default'
+            : s,
+        )
+        .map((skin) => (
+          <img
+            key={skin.id}
+            src={`${import.meta.env.BASE_URL}assets/${selectedCharacter.toLowerCase()}-${skin.id.replace('skin_', '')}-skin.png`}
+            alt={skin.name}
+            className={cn(
+              'w-36 cursor-pointer hover:opacity-80 transition-all duration-200 rounded-lg',
+              {
+                'blur-sm cursor-not-allowed md:block hidden':
+                  skin.unlockCondition !== null,
+                'border-2': selectedSkin?.id === skin.id,
+              },
+            )}
+            onClick={() => handleSelectSkin(skin)}
+          />
+        ))}
     </div>
   );
 };

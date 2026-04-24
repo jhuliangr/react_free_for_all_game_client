@@ -8,10 +8,12 @@ import { WORLD_SIZE } from '../utils/canvasConstants';
 const MOVE_STEP = 10;
 // Server accepts at most one move every 40ms (see ws_handler MOVE_MIN_INTERVAL_MS).
 const MIN_MOVE_INTERVAL_MS = 40;
-// Per-frame lerp factor when easing the displayed local position toward the
-// reconciled prediction. Small enough to avoid visible snaps, large enough to
-// converge within a few frames.
-const SMOOTH_CORRECTION = 0.25;
+// Per-frame lerp factor when easing the displayed local position toward
+// the reconciled prediction. Trades a tiny bit of input latency for
+// significantly smoother on-screen motion: rate-limit drops, discrete
+// 10-unit steps, and micro-reconciliations all get rounded into a
+// continuous glide instead of frame-by-frame pops.
+const SMOOTH_CORRECTION = 0.5;
 // If the reconciliation error exceeds this, snap instead of easing (likely a
 // teleport/spawn, not mispredicted input).
 const SNAP_THRESHOLD = 40;
