@@ -17,10 +17,12 @@ export const SkinSelector: React.FC = () => {
   return (
     <div className="md:flex gap-3 rounded-xl">
       {skins
-        .filter((s) =>
-          !import.meta.env.VITE_SHOW_INCOMPLETE_SPRITES
-            ? s.id === 'skin_default'
-            : s,
+        .filter(
+          (s) =>
+            // !import.meta.env.VITE_SHOW_INCOMPLETE_SPRITES
+            // ?
+            s.id === 'skin_default',
+          // : s,
         )
         .map((skin) => (
           <img
