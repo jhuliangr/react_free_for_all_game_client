@@ -5,6 +5,7 @@ import { cn } from '#shared/utils';
 import { AchievementNotification } from './AchievementNotification';
 import { CooldownIndicator } from './CooldownIndicator';
 import { EventLog } from './EventLog';
+import { Leaderboard } from './Leaderboard';
 import { LifeAndXpIndicator } from './LifeAndXpIndicator';
 
 type Props = {
@@ -27,6 +28,7 @@ export const Hud: React.FC<Props> = ({
   return (
     <div>
       <LifeAndXpIndicator />
+      <Leaderboard />
       <EventLog />
       {lastUnlockedAchievement && (
         <AchievementNotification

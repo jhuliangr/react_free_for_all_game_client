@@ -83,3 +83,22 @@ export const GetGameServerInfoResponseSchema = z.object({
 export type GetGameServerInfoResponse = z.infer<
   typeof GetGameServerInfoResponseSchema
 >;
+
+export const MatchPlayerSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  kills: z.number(),
+  xp: z.number(),
+  level: z.number(),
+});
+
+export type MatchPlayer = z.infer<typeof MatchPlayerSchema>;
+
+export const GetMatchPlayersResponseSchema = z.object({
+  type: z.literal('match_players'),
+  entries: z.array(MatchPlayerSchema),
+});
+
+export type GetMatchPlayersResponse = z.infer<
+  typeof GetMatchPlayersResponseSchema
+>;
